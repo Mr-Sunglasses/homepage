@@ -1,0 +1,30 @@
+---
+import type { GetStaticPaths } from "astro";
+import Pager from "@/components/Pager.astro";
+import YearList from "@/components/YearList.astro";
+import Base from "@/layouts/Base.astro";
+import { getAllItems, type Item, PAGE_SIZE, tagSlug } from "@/lib/content";
+
+export const getStaticPaths = (async ({ paginate }) => {
+	const items = await getAllItems();
+	const names = new Map<string, string>();
+	for (const tag of items.flatMap((item) => item.tags)) {
+		if (!names.has(tagSlug(tag))) names.set(tagSlug(tag), tag);
+	}
+	return [...names.entries()].flatMap(([slug, name]) =>
+		paginate(
+			items.filter((item) => item.tags.some((t) => tagSlug(t) === slug)),
+			{ params: { tag: slug }, props: { name }, pageSize: PAGE_SIZE },
+		),
+	);
+}) satisfies GetStaticPaths;
+
+const { page, name } = Astro.props;
+---
+
+<Base title={`Tagged “${name}”`} crumbs={[{ label: "Tags", href: "/tags/" }, { label: name }]}>
+	<h1>Tagged “{name}”</h1>
+	<p class="filters">{page.total} {page.total === 1 ? "entry" : "entries"} across writing, notes and links.</p>
+	<YearList items={page.data as Item[]} showSection />
+	<Pager page={page} />
+</Base>

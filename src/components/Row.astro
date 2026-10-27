@@ -4,20 +4,27 @@ import { type Item, isoDate } from "@/lib/content";
 interface Props {
 	item: Item;
 	showSection?: boolean;
+	showTags?: boolean;
 }
 
-const { item, showSection = false } = Astro.props;
-const meta = [showSection ? item.section.toLowerCase() : null, ...item.tags]
-	.filter(Boolean)
-	.join(" · ");
+const MAX_TAGS = 3;
+const { item, showSection = false, showTags = true } = Astro.props;
+const tags = showTags ? item.tags : [];
+const meta = [
+	showSection ? item.label : null,
+	...tags.slice(0, MAX_TAGS),
+	tags.length > MAX_TAGS ? `+${tags.length - MAX_TAGS}` : null,
+].filter(Boolean);
 ---
 
 <li class="row">
 	<time datetime={isoDate(item.date)}>{isoDate(item.date)}</time>
-	<span>
-		<a href={item.href}>{item.title}</a>
-		{item.detail && <span class="detail">{item.detail}</span>}
-		{item.isDraft && <span class="draft-mark">draft</span>}
-	</span>
-	<span class="tags">{meta}</span>
+	<div class="row-body">
+		<span class="row-title">
+			<a href={item.href}>{item.title}</a>
+			{item.detail && <span class="detail">{item.detail}</span>}
+			{item.isDraft && <span class="draft-mark">draft</span>}
+		</span>
+		{meta.length > 0 && <span class="tags">{meta.join(" · ")}</span>}
+	</div>
 </li>

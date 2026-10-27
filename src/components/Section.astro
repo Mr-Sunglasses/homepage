@@ -2,7 +2,8 @@
 import Row from "@/components/Row.astro";
 import type { Item } from "@/lib/content";
 
-// A homepage block: heading, the latest rows, and a link to the rest.
+// A short block: heading, the latest few rows, and a link to the full list.
+// It never grows with the amount of content; the full list is paginated.
 interface Props {
 	title: string;
 	href: string;
@@ -14,7 +15,7 @@ interface Props {
 const { title, href, more, items, empty } = Astro.props;
 ---
 
-<section>
+<section class="block">
 	<div class="section-head">
 		<h2><a href={href}>{title}</a></h2>
 		<a href={href}>{more} →</a>
@@ -23,7 +24,7 @@ const { title, href, more, items, empty } = Astro.props;
 		items.length > 0 ? (
 			<ul class="rows">
 				{items.map((item) => (
-					<Row item={item} />
+					<Row item={item} showTags={false} />
 				))}
 			</ul>
 		) : (

@@ -1,0 +1,48 @@
+---
+import Base from "@/layouts/Base.astro";
+import { getAllItems } from "@/lib/content";
+
+// One line per year; each year has its own page so no page grows forever.
+const items = await getAllItems();
+const years = new Map<number, Record<string, number>>();
+for (const item of items) {
+	const year = item.date.getUTCFullYear();
+	const counts = years.get(year) ?? {};
+	const key =
+		item.label === "note"
+			? "notes"
+			: item.label === "link"
+				? "links"
+				: "writing";
+	counts[key] = (counts[key] ?? 0) + 1;
+	years.set(year, counts);
+}
+const nouns: Record<string, [string, string]> = {
+	writing: ["piece of writing", "pieces of writing"],
+	notes: ["note", "notes"],
+	links: ["link", "links"],
+};
+const describe = (counts: Record<string, number>) =>
+	Object.entries(nouns)
+		.filter(([key]) => counts[key])
+		.map(
+			([key, [one, many]]) =>
+				`${counts[key]} ${counts[key] === 1 ? one : many}`,
+		)
+		.join(" · ");
+---
+
+<Base title="Archive" description="Everything on this site, by year." crumbs={[{ label: "Archive" }]}>
+	<h1>Archive</h1>
+	<p class="filters">Everything I've published, by year. Also by <a href="/tags/">tag</a>.</p>
+	<ul class="rows">
+		{
+			[...years.entries()].map(([year, counts]) => (
+				<li class="row">
+					<a href={`/archive/${year}/`}>{year}</a>
+					<span class="meta">{describe(counts)}</span>
+				</li>
+			))
+		}
+	</ul>
+</Base>

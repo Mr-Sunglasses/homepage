@@ -1,0 +1,63 @@
+---
+import type { GetStaticPaths } from "astro";
+import Row from "@/components/Row.astro";
+import Base from "@/layouts/Base.astro";
+import { getAllItems, type Item, isoMonth, monthName } from "@/lib/content";
+
+export const getStaticPaths = (async () => {
+	const items = await getAllItems();
+	const years = [...new Set(items.map((item) => item.date.getUTCFullYear()))];
+	return years.map((year, i) => ({
+		params: { year: String(year) },
+		props: {
+			items: items.filter((item) => item.date.getUTCFullYear() === year),
+			newer: years[i - 1],
+			older: years[i + 1],
+		},
+	}));
+}) satisfies GetStaticPaths;
+
+const { items, newer, older } = Astro.props;
+const { year } = Astro.params;
+
+// Writing and links are listed; notes can be many, so each month links to
+// its notes archive instead of listing them all here.
+const months = new Map<string, { date: Date; rows: Item[]; notes: number }>();
+for (const item of items) {
+	const key = isoMonth(item.date);
+	const month = months.get(key) ?? { date: item.date, rows: [], notes: 0 };
+	if (item.label === "note") month.notes += 1;
+	else month.rows.push(item);
+	months.set(key, month);
+}
+---
+
+<Base title={`Archive, ${year}`} crumbs={[{ label: "Archive", href: "/archive/" }, { label: year }]}>
+	<h1>{year}</h1>
+	{
+		[...months.entries()].map(([key, { date, rows, notes }]) => (
+			<section>
+				<div class="section-head">
+					<h2>{monthName(date)}</h2>
+					{notes > 0 && (
+						<a href={`/notes/${key.replace("-", "/")}/`}>
+							{notes} {notes === 1 ? "note" : "notes"} →
+						</a>
+					)}
+				</div>
+				{rows.length > 0 && (
+					<ul class="rows">
+						{rows.map((item) => (
+							<Row item={item} showSection />
+						))}
+					</ul>
+				)}
+			</section>
+		))
+	}
+	<nav class="pager" aria-label="Years">
+		<span>{newer && <a href={`/archive/${newer}/`}>← {newer}</a>}</span>
+		<span />
+		<span>{older && <a href={`/archive/${older}/`}>{older} →</a>}</span>
+	</nav>
+</Base>

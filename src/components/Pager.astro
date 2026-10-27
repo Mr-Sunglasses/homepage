@@ -1,0 +1,22 @@
+---
+import type { Page } from "astro";
+
+// Newer/older links for paginated lists. Renders nothing for a single page.
+interface Props {
+	page: Page<unknown>;
+}
+
+const { page } = Astro.props;
+---
+
+{
+	page.lastPage > 1 && (
+		<nav class="pager" aria-label="Pages">
+			<span>{page.url.prev && <a href={page.url.prev}>← Newer</a>}</span>
+			<span class="meta">
+				Page {page.currentPage} of {page.lastPage}
+			</span>
+			<span>{page.url.next && <a href={page.url.next}>Older →</a>}</span>
+		</nav>
+	)
+}

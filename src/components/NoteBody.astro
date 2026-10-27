@@ -22,7 +22,8 @@ const Heading = headingLevel === 1 ? "h1" : "h2";
 	{
 		link ? (
 			<Heading>
-				↗ <a href={link}>{linkTitle ?? title ?? domainOf(link)}</a> <span class="meta">({domainOf(link)})</span>
+				↗ <a href={link}>{linkTitle ?? title ?? domainOf(link)}</a>
+				{(linkTitle ?? title) && <span class="meta">({domainOf(link)})</span>}
 			</Heading>
 		) : (
 			title && <Heading>{title}</Heading>

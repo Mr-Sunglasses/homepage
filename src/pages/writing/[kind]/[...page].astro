@@ -1,0 +1,51 @@
+---
+import type { GetStaticPaths } from "astro";
+import KindFilter from "@/components/KindFilter.astro";
+import Pager from "@/components/Pager.astro";
+import YearList from "@/components/YearList.astro";
+import Base from "@/layouts/Base.astro";
+import {
+	getPosts,
+	type Kind,
+	kinds,
+	PAGE_SIZE,
+	type Post,
+	postItem,
+} from "@/lib/content";
+
+// /writing/articles/, /writing/articles/2/, … newest first.
+export const getStaticPaths = (async ({ paginate }) => {
+	const posts = await getPosts();
+	const kindsInUse = (Object.keys(kinds) as Kind[]).filter((kind) =>
+		posts.some((p) => p.data.kind === kind),
+	);
+	const counts = Object.fromEntries(
+		kindsInUse.map((kind) => [
+			kind,
+			posts.filter((p) => p.data.kind === kind).length,
+		]),
+	);
+	return kindsInUse.flatMap((kind) =>
+		paginate(
+			posts.filter((p) => p.data.kind === kind),
+			{
+				params: { kind: kinds[kind].slug },
+				props: { kind, counts },
+				pageSize: PAGE_SIZE,
+			},
+		),
+	);
+}) satisfies GetStaticPaths;
+
+const { page, kind, counts } = Astro.props;
+const { label } = kinds[kind as Kind];
+const title =
+	page.currentPage > 1 ? `${label}, page ${page.currentPage}` : label;
+---
+
+<Base title={title} crumbs={[{ label: "Writing", href: "/writing/" }, { label }]}>
+	<h1>{label}</h1>
+	<KindFilter active={kind as Kind} counts={counts} />
+	<YearList items={(page.data as Post[]).map(postItem)} />
+	<Pager page={page} />
+</Base>

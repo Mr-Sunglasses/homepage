@@ -1,17 +1,26 @@
 ---
 import { render } from "astro:content";
+import type { GetStaticPaths } from "astro";
+import Pager from "@/components/Pager.astro";
 import Base from "@/layouts/Base.astro";
 import {
 	domainOf,
 	getLinks,
 	isoDate,
 	isoMonth,
+	type Link,
 	linkAnchor,
 	monthName,
+	PAGE_SIZE,
 	tagSlug,
 } from "@/lib/content";
 
-const links = await getLinks();
+// /links/, /links/2/, … newest first.
+export const getStaticPaths = (async ({ paginate }) =>
+	paginate(await getLinks(), { pageSize: PAGE_SIZE })) satisfies GetStaticPaths;
+
+const { page } = Astro.props;
+const links = page.data as Link[];
 const rendered = await Promise.all(
 	links.map(async (link) => ({ link, Content: (await render(link)).Content })),
 );
@@ -22,7 +31,11 @@ for (const entry of rendered) {
 }
 ---
 
-<Base title="Links" description="Things worth reading, with a line on why." crumbs={[{ label: "Links" }]}>
+<Base
+	title={page.currentPage > 1 ? `Links, page ${page.currentPage}` : "Links"}
+	description="Things worth reading, with a line on why."
+	crumbs={[{ label: "Links" }]}
+>
 	<h1>Links</h1>
 	<p class="filters">Things I think are worth your time, and why. <a href="/links/rss.xml">rss</a></p>
 
@@ -56,4 +69,5 @@ for (const entry of rendered) {
 			</section>
 		))
 	}
+	<Pager page={page} />
 </Base>

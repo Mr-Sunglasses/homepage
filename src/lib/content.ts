@@ -45,6 +45,9 @@ export const kinds = {
 } as const;
 export type Kind = keyof typeof kinds;
 
+// Long lists are split into pages of this size.
+export const PAGE_SIZE = 20;
+
 export const postUrl = (post: Post) => `/posts/${post.id}/`;
 // Notes are stored as notes/<year>/<date>-<slug>.md; the URL drops the year folder.
 export const noteSlug = (note: Note) => note.id.split("/").pop() as string;
@@ -94,7 +97,8 @@ export type Item = {
 	date: Date;
 	title: string;
 	href: string;
-	section: "Writing" | "Notes" | "Links";
+	// What kind of thing it is, shown on mixed lists (archive, tags).
+	label: Kind | "note" | "link";
 	detail?: string;
 	tags: string[];
 	isDraft: boolean;
@@ -105,8 +109,7 @@ export const postItem = (post: Post): Item => ({
 	date: post.data.date,
 	title: post.data.title,
 	href: postUrl(post),
-	section: "Writing",
-	detail: post.data.kind === "article" ? undefined : post.data.kind,
+	label: post.data.kind,
 	tags: post.data.tags,
 	isDraft: post.isDraft,
 });
@@ -117,7 +120,7 @@ export const noteItem = (note: Note): Item => ({
 		? `↗ ${note.data.linkTitle ?? note.data.title ?? domainOf(note.data.link)}`
 		: noteLabel(note),
 	href: noteUrl(note),
-	section: "Notes",
+	label: "note",
 	tags: note.data.tags,
 	isDraft: note.isDraft,
 });
@@ -126,7 +129,7 @@ export const linkItem = (link: Link): Item => ({
 	date: link.data.date,
 	title: link.data.title,
 	href: link.data.url,
-	section: "Links",
+	label: "link",
 	detail: domainOf(link.data.url),
 	tags: link.data.tags,
 	isDraft: link.isDraft,

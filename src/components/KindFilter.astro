@@ -3,24 +3,26 @@ import { type Kind, kinds } from "@/lib/content";
 
 interface Props {
 	active?: Kind;
-	available: Kind[];
+	counts: Partial<Record<Kind, number>>;
 }
 
-const { active, available } = Astro.props;
+const { active, counts } = Astro.props;
+const available = (Object.keys(kinds) as Kind[]).filter((kind) => counts[kind]);
 ---
 
-<p class="filters">
-	Show:
-	<a href="/writing/" aria-current={active ? undefined : "page"}>all</a>
-	{
-		available.map((kind) => (
-			<>
-				{" · "}
-				<a href={`/writing/${kinds[kind].slug}/`} aria-current={kind === active ? "page" : undefined}>
-					{kinds[kind].label.toLowerCase()}
-				</a>
-			</>
-		))
-	}
-	· <a href="/writing/rss.xml">rss</a>
-</p>
+<nav class="filters" aria-label="Kinds of writing">
+	<ul class="inline-list">
+		<li><a href="/writing/" aria-current={active ? undefined : "page"}>all</a></li>
+		{
+			available.map((kind) => (
+				<li>
+					<a href={`/writing/${kinds[kind].slug}/`} aria-current={kind === active ? "page" : undefined}>
+						{kinds[kind].label.toLowerCase()}
+					</a>{" "}
+					<span class="meta">{counts[kind]}</span>
+				</li>
+			))
+		}
+		<li><a href="/writing/rss.xml">rss</a></li>
+	</ul>
+</nav>

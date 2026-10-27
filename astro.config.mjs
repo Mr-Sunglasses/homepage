@@ -2,6 +2,7 @@ import sitemap from "@astrojs/sitemap";
 import { defineConfig } from "astro/config";
 import remarkDirective from "remark-directive";
 import { rehypeEmbedsToLinks } from "./src/plugins/rehype-embeds-to-links.mjs";
+import { remarkDropTitleHeading } from "./src/plugins/remark-drop-title-heading.mjs";
 import { remarkPlainDirectives } from "./src/plugins/remark-plain-directives.mjs";
 
 // https://astro.build/config
@@ -21,7 +22,11 @@ export default defineConfig({
 		}),
 	],
 	markdown: {
-		remarkPlugins: [remarkDirective, remarkPlainDirectives],
+		remarkPlugins: [
+			remarkDirective,
+			remarkPlainDirectives,
+			remarkDropTitleHeading,
+		],
 		rehypePlugins: [rehypeEmbedsToLinks],
 		shikiConfig: {
 			themes: { light: "github-light", dark: "github-dark" },

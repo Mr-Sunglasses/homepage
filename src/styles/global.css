@@ -236,7 +236,8 @@ td {
 	margin: 0 0 1rem;
 }
 
-/* The one list row used on every index */
+/* The one list row used on every index: date, then title with a small
+   line of tags underneath. Tags never compete with the title for width. */
 .rows {
 	list-style: none;
 	margin: 0;
@@ -244,10 +245,22 @@ td {
 }
 .row {
 	display: grid;
-	grid-template-columns: 6.5rem minmax(0, 1fr) auto;
-	gap: 0 0.9rem;
+	grid-template-columns: 6.5rem minmax(0, 1fr);
+	gap: 0 1rem;
 	align-items: baseline;
-	padding: 0.2rem 0;
+	padding: 0.3rem 0;
+}
+.row-body {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+.row-title {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 0 0.5rem;
+	overflow-wrap: anywhere;
 }
 .row time,
 .meta,
@@ -257,12 +270,9 @@ td {
 	color: var(--muted);
 	font-variant-numeric: tabular-nums;
 }
-.row .tags {
-	text-align: right;
-}
 .row .detail {
 	color: var(--muted);
-	font-size: 0.9em;
+	font-size: 0.85em;
 }
 .draft-mark {
 	font-family: var(--sans);
@@ -275,11 +285,20 @@ td {
 @media (max-width: 34rem) {
 	.row {
 		grid-template-columns: minmax(0, 1fr);
-		padding: 0.35rem 0;
+		padding: 0.45rem 0;
 	}
-	.row .tags {
-		text-align: left;
-	}
+}
+
+.pager {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 1rem;
+	margin-top: 2rem;
+	padding-top: 0.75rem;
+	border-top: 1px solid var(--line);
+	font-family: var(--sans);
+	font-size: 0.9rem;
 }
 
 .year {
@@ -309,6 +328,7 @@ td {
 .filters {
 	font-family: var(--sans);
 	font-size: 0.9rem;
+	margin: 0 0 1rem;
 }
 .filters a[aria-current] {
 	color: var(--fg);
@@ -327,6 +347,9 @@ td {
 	font-size: 0.85rem;
 	color: var(--muted);
 	margin: -0.25rem 0 1.5rem;
+}
+.entry-end p {
+	margin: 0;
 }
 .entry-end {
 	margin-top: 2.5rem;

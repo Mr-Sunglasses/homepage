@@ -6,6 +6,7 @@ import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
 import { unified } from "unified";
 import { describe, rehypeEmbedsToLinks } from "./rehype-embeds-to-links.mjs";
+import { remarkDropTitleHeading } from "./remark-drop-title-heading.mjs";
 import { remarkPlainDirectives } from "./remark-plain-directives.mjs";
 
 const toHtml = async (markdown) =>
@@ -76,4 +77,34 @@ test("meaningful iframe titles are kept", () => {
 		"How cron works",
 	);
 	assert.equal(text, "▶ Video on YouTube: How cron works");
+});
+
+const withTitle = async (markdown, title) => {
+	const file = { value: markdown, data: { astro: { frontmatter: { title } } } };
+	return String(
+		await unified()
+			.use(remarkParse)
+			.use(remarkDropTitleHeading)
+			.use(remarkRehype)
+			.use(rehypeStringify)
+			.process(file),
+	);
+};
+
+test("a first heading that repeats the title is dropped", async () => {
+	const html = await withTitle(
+		"# She Was My Color\n\nRose.",
+		"She was my color!",
+	);
+	assert.equal(html, "<p>Rose.</p>");
+});
+
+test("a different first heading is kept", async () => {
+	const html = await withTitle("## Setup\n\nText.", "Mastering Cron");
+	assert.match(html, /<h2>Setup<\/h2>/);
+});
+
+test("a repeated title later in the post is kept", async () => {
+	const html = await withTitle("Intro.\n\n# Mastering Cron", "Mastering Cron");
+	assert.match(html, /<h1>Mastering Cron<\/h1>/);
 });

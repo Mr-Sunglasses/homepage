@@ -14,7 +14,10 @@ import {
 	postItem,
 } from "@/lib/content";
 
+// Each block shows a fixed number of rows, so the homepage stays the same
+// length however much is published. Full lists are on the section pages.
 const LATEST = 5;
+const LATEST_POEMS = 3;
 const [posts, notes, links, pages] = await Promise.all([
 	getPosts(),
 	getNotes(),
@@ -55,8 +58,22 @@ const Now = now ? (await render(now)).Content : null;
 		title="Writing"
 		href="/writing/"
 		more="all writing"
-		items={posts.slice(0, LATEST).map(postItem)}
+		items={posts
+			.filter((post) => post.data.kind !== "poem")
+			.slice(0, LATEST)
+			.map(postItem)}
 		empty="Nothing published yet."
+	/>
+
+	<Section
+		title="Poems"
+		href="/writing/poems/"
+		more="all poems"
+		items={posts
+			.filter((post) => post.data.kind === "poem")
+			.slice(0, LATEST_POEMS)
+			.map(postItem)}
+		empty="No poems yet."
 	/>
 
 	<Section title="Travel" href="/travel/" more="all trips" items={[]} empty="Trips and photos from India and abroad are on their way." />

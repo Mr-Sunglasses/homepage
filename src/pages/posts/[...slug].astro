@@ -15,8 +15,12 @@ import {
 // Paths match the old blog (/posts/<slug>/, /posts/poems/<slug>/) so links keep working.
 export const getStaticPaths = (async () => {
 	const posts = await getPosts();
-	const published = posts.filter((post) => !post.isDraft);
 	return posts.map((post) => {
+		// Older/newer links stay within the same kind: articles lead to
+		// articles, poems to poems.
+		const published = posts.filter(
+			(p) => !p.isDraft && p.data.kind === post.data.kind,
+		);
 		const i = published.indexOf(post);
 		return {
 			params: { slug: post.id },
@@ -55,8 +59,8 @@ const kindLabel = kinds[kind].label;
 		<h1>{title}</h1>
 		<p class="entry-meta">
 			<time datetime={isoDate(date)}>{isoDate(date)}</time>
-			{updated && <> · updated <time datetime={isoDate(updated)}>{isoDate(updated)}</time></>}
-			· {readingMinutes(post.body)} min read
+			{updated && <>{" · "}updated <time datetime={isoDate(updated)}>{isoDate(updated)}</time></>}
+			{" · "}{readingMinutes(post.body)} min read
 		</p>
 		<Content />
 		<EntryEnd fediverse={fediverse} tags={tags}>

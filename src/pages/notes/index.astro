@@ -1,13 +1,24 @@
 ---
 import NoteBody from "@/components/NoteBody.astro";
 import Base from "@/layouts/Base.astro";
-import { getNotes, isoMonth, monthName } from "@/lib/content";
+import { getNotes, isoMonth } from "@/lib/content";
 
-const SHOWN = 30;
+// The latest notes in full; older ones live in the monthly archives.
+const SHOWN = 10;
 const notes = await getNotes();
-const months = [
-	...new Map(notes.map((n) => [isoMonth(n.data.date), n.data.date])).entries(),
-];
+// Month links grouped into one row per year: 2026 · Oct Sep Aug …
+const years = new Map<string, Map<string, number>>();
+for (const note of notes) {
+	const [year, month] = isoMonth(note.data.date).split("-");
+	const months = years.get(year) ?? new Map<string, number>();
+	months.set(month, (months.get(month) ?? 0) + 1);
+	years.set(year, months);
+}
+const shortMonth = (year: string, month: string) =>
+	new Date(`${year}-${month}-01T00:00:00Z`).toLocaleDateString("en-GB", {
+		month: "short",
+		timeZone: "UTC",
+	});
 ---
 
 <Base title="Notes" description="Short, dated thoughts, often about something I read." crumbs={[{ label: "Notes" }]}>
@@ -18,13 +29,22 @@ const months = [
 	{notes.slice(0, SHOWN).map((note) => <NoteBody note={note} />)}
 
 	{
-		months.length > 0 && (
+		years.size > 0 && (
 			<section>
-				<h2>Archive by month</h2>
-				<ul class="inline-list">
-					{months.map(([month, date]) => (
-						<li>
-							<a href={`/notes/${month.replace("-", "/")}/`}>{monthName(date)}</a>
+				<h2>All notes, by month</h2>
+				<ul class="rows">
+					{[...years.entries()].map(([year, months]) => (
+						<li class="row">
+							<span class="meta">{year}</span>
+							<ul class="inline-list">
+								{[...months.entries()].map(([month, count]) => (
+									<li>
+										<a href={`/notes/${year}/${month}/`} title={`${count} notes`}>
+											{shortMonth(year, month)}
+										</a>
+									</li>
+								))}
+							</ul>
 						</li>
 					))}
 				</ul>

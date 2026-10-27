@@ -1,17 +1,31 @@
 ---
 import KindFilter from "@/components/KindFilter.astro";
-import YearList from "@/components/YearList.astro";
+import Section from "@/components/Section.astro";
 import Base from "@/layouts/Base.astro";
 import { getPosts, type Kind, kinds, postItem } from "@/lib/content";
 
+const LATEST = 5;
 const posts = await getPosts();
-const available = (Object.keys(kinds) as Kind[]).filter((kind) =>
-	posts.some((post) => post.data.kind === kind),
+const byKind = (Object.keys(kinds) as Kind[])
+	.map((kind) => ({ kind, posts: posts.filter((p) => p.data.kind === kind) }))
+	.filter(({ posts }) => posts.length > 0);
+const counts = Object.fromEntries(
+	byKind.map(({ kind, posts }) => [kind, posts.length]),
 );
 ---
 
 <Base title="Writing" description="Articles, poems and longer thoughts." crumbs={[{ label: "Writing" }]}>
 	<h1>Writing</h1>
-	<KindFilter available={available} />
-	<YearList items={posts.map(postItem)} />
+	<KindFilter counts={counts} />
+	{
+		byKind.map(({ kind, posts }) => (
+			<Section
+				title={kinds[kind].label}
+				href={`/writing/${kinds[kind].slug}/`}
+				more={`all ${posts.length} ${kinds[kind].label.toLowerCase()}`}
+				items={posts.slice(0, LATEST).map(postItem)}
+				empty=""
+			/>
+		))
+	}
 </Base>
