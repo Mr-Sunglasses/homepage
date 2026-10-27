@@ -275,6 +275,7 @@ td {
 	font-size: 0.85em;
 }
 .draft-mark {
+	margin-left: 0.5em;
 	font-family: var(--sans);
 	font-size: 0.7rem;
 	font-weight: 700;
@@ -381,6 +382,10 @@ td {
 .link h3 {
 	font-size: 1.05rem;
 	margin: 0.5rem 0 0.25rem;
+}
+/* A note's own page: its footer already draws the dividing line. */
+.note:has(+ .entry-end) {
+	border-bottom: 0;
 }
 .note > p:first-child,
 .link > p:first-child {
