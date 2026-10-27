@@ -1,0 +1,71 @@
+---
+import type { GetStaticPaths } from "astro";
+import Picture from "@/components/Picture.astro";
+import { site } from "@/config";
+import Base from "@/layouts/Base.astro";
+import { getTrips, isoDate, photoUrl, tripSlug, tripUrl } from "@/lib/content";
+import { largestWidth, photoFile, widthUpTo } from "@/lib/photos";
+
+// One page per photo: the "lightbox", but as a plain page with its own
+// address, caption and older/newer links. No JavaScript.
+export const getStaticPaths = (async () => {
+	const trips = await getTrips();
+	return trips.flatMap((trip) => {
+		const photos = [...trip.data.photos].sort(
+			(a, b) => (a.takenAt?.valueOf() ?? 0) - (b.takenAt?.valueOf() ?? 0),
+		);
+		return photos.map((photo, i) => ({
+			params: { trip: tripSlug(trip), photo: photo.id },
+			props: {
+				trip,
+				photo,
+				index: i,
+				count: photos.length,
+				prev: photos[i - 1],
+				next: photos[i + 1],
+			},
+		}));
+	});
+}) satisfies GetStaticPaths;
+
+const { trip, photo, index, count, prev, next } = Astro.props;
+const label =
+	photo.caption || photo.alt || `${trip.data.title}, photo ${index + 1}`;
+const full = largestWidth(photo);
+---
+
+<Base
+	title={`${label} · ${trip.data.title}`}
+	description={photo.alt || `A photo from ${trip.data.title}.`}
+	image={photoFile(trip, photo, widthUpTo(photo, 1280), "webp")}
+	isDraft={trip.isDraft}
+	crumbs={[
+		{ label: "Travel", href: "/travel/" },
+		{ label: trip.data.title, href: tripUrl(trip) },
+		{ label: `Photo ${index + 1} of ${count}` },
+	]}
+>
+	<figure class="photo">
+		<Picture trip={trip} photo={photo} sizes="(max-width: 46rem) 100vw, 44rem" eager />
+		{photo.caption && <figcaption>{photo.caption}</figcaption>}
+	</figure>
+
+	<p class="meta photo-meta">
+		{[photo.place, photo.takenAt && isoDate(photo.takenAt)].filter(Boolean).join(" · ")}
+		{photo.alt === "" && <span class="draft-mark">no alt text yet</span>}
+	</p>
+
+	<nav class="pager" aria-label="Photos">
+		<span>{prev && <a href={photoUrl(trip, prev)}>← Previous</a>}</span>
+		<span class="meta">
+			<a href={tripUrl(trip)}>{trip.data.title}</a>, {index + 1} of {count}
+		</span>
+		<span>{next && <a href={photoUrl(trip, next)}>Next →</a>}</span>
+	</nav>
+
+	<p class="meta">
+		Full size: <a href={photoFile(trip, photo, full, "webp")}>{full}px WebP</a> ·{" "}
+		<a href={photoFile(trip, photo, full, "avif")}>AVIF</a> · Photo{" "}
+		<a href={site.license.url}>{site.license.name}</a>
+	</p>
+</Base>

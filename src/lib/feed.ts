@@ -4,19 +4,25 @@ import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import sanitizeHtml from "sanitize-html";
 import { site } from "@/config";
 import {
+	coverOf,
 	type Link,
 	type Note,
 	noteLabel,
 	noteUrl,
 	type Post,
 	postUrl,
+	type Trip,
+	tripDates,
+	tripPlaces,
+	tripUrl,
 } from "@/lib/content";
+import { photoFile, widthUpTo } from "@/lib/photos";
 
 let container: AstroContainer | undefined;
 
 // The entry's HTML exactly as the site renders it, with absolute URLs so
 // images and links work in feed readers.
-async function html(entry: Post | Note | Link) {
+async function html(entry: Post | Note | Link | Trip) {
 	container ??= await AstroContainer.create();
 	const { Content } = await render(entry);
 	const out = await container.renderToString(Content);
@@ -76,6 +82,30 @@ export async function linkFeedItem(link: Link): Promise<RSSFeedItem> {
 		link: link.data.url,
 		categories: link.data.tags,
 		content: await html(link),
+	};
+}
+
+const escapeHtml = (text: string) =>
+	text
+		.replaceAll("&", "&amp;")
+		.replaceAll("<", "&lt;")
+		.replaceAll(">", "&gt;")
+		.replaceAll('"', "&quot;");
+
+export async function tripFeedItem(trip: Trip): Promise<RSSFeedItem> {
+	const cover = coverOf(trip);
+	const { photos, summary, title } = trip.data;
+	const image = cover
+		? `<p><img src="${photoFile(trip, cover, widthUpTo(cover, 1280), "webp")}" alt="${escapeHtml(cover.alt)}" width="${cover.width}" height="${cover.height}"></p>`
+		: "";
+	const facts = `<p>${escapeHtml([tripDates(trip), tripPlaces(trip)].filter(Boolean).join(" · "))}. <a href="${new URL(tripUrl(trip), site.url).href}">See all ${photos.length} photos</a>.</p>`;
+	return {
+		title,
+		pubDate: trip.data.start,
+		description: summary,
+		link: tripUrl(trip),
+		categories: trip.data.tags,
+		content: image + facts + (await html(trip)),
 	};
 }
 

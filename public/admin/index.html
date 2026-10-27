@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="robots" content="noindex, nofollow" />
+		<title>Admin · Kanishk Pachauri</title>
+	</head>
+	<body>
+		<!--
+			The admin panel is the one page on this site that needs JavaScript.
+			Locally: `pnpm dev`, open http://localhost:4321/admin/index.html in
+			Chrome, Edge or Brave, and choose "Work with Local Repository".
+			Online: sign in with a GitHub token (see README).
+		-->
+		<script>
+			window.CMS_MANUAL_INIT = true;
+		</script>
+		<script src="/admin/config.js"></script>
+		<script src="https://unpkg.com/@sveltia/cms@0.239.1/dist/sveltia-cms.js"></script>
+		<script>
+			CMS.registerPreviewStyle("/admin/preview.css");
+			CMS.init({ config: window.SITE_CMS_CONFIG });
+		</script>
+	</body>
+</html>

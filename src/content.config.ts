@@ -63,17 +63,66 @@ const pages = (base: string) =>
 		}),
 	});
 
+const photo = z.strictObject({
+	id: z.string().regex(/^[0-9a-f]{12}$/),
+	ext: z.string(),
+	width: z.number().int().positive(),
+	height: z.number().int().positive(),
+	widths: z.array(z.number().int().positive()).min(1),
+	sha256: z.string().regex(/^[0-9a-f]{64}$/),
+	// Empty while a trip is a draft; the build refuses published photos
+	// without it (scripts/check-built.mjs).
+	alt: z.string().default(""),
+	caption: z.string().optional(),
+	takenAt: z.coerce.date().optional(),
+	place: z.string().optional(),
+	color: z
+		.string()
+		.regex(/^#[0-9a-f]{6}$/i)
+		.optional(),
+});
+
+// One folder per trip: trips/<yyyy-mm>-<name>/index.md, story in the body.
+const trips = (base: string) =>
+	defineCollection({
+		loader: glob({ pattern: "*/index.md", base }),
+		schema: z.strictObject({
+			title: z.string(),
+			start: z.coerce.date(),
+			end: z.coerce.date().optional(),
+			region: z.enum(["india", "world"]),
+			summary: z.string().default(""),
+			// City-level places for the map; never exact locations.
+			places: z
+				.array(
+					z.strictObject({
+						name: z.string().min(1),
+						country: z.string().min(1),
+						lat: z.number().min(-90).max(90),
+						lng: z.number().min(-180).max(180),
+					}),
+				)
+				.default([]),
+			cover: z.string().optional(),
+			tags: z.array(z.string()).default([]),
+			fediverse: z.url().optional(),
+			photos: z.array(photo).default([]),
+		}),
+	});
+
 export const collections = {
 	posts: posts("./src/content/posts"),
 	notes: notes("./src/content/notes"),
 	links: links("./src/content/links"),
 	pages: pages("./src/content/pages"),
+	trips: trips("./src/content/trips"),
 	...(DEV
 		? {
 				postDrafts: posts("./drafts/posts"),
 				noteDrafts: notes("./drafts/notes"),
 				linkDrafts: links("./drafts/links"),
 				pageDrafts: pages("./drafts/pages"),
+				tripDrafts: trips("./drafts/trips"),
 			}
 		: {}),
 };

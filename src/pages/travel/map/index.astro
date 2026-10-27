@@ -1,0 +1,65 @@
+---
+import PlacesMap, { type Pin } from "@/components/PlacesMap.astro";
+import Base from "@/layouts/Base.astro";
+import { getTrips, tripDates, tripUrl } from "@/lib/content";
+
+const trips = await getTrips();
+const pins: Pin[] = trips.flatMap((trip) =>
+	trip.data.places.map((place) => ({
+		...place,
+		href: tripUrl(trip),
+		trip: trip.data.title,
+	})),
+);
+const indiaPins = pins.filter((pin) => pin.country === "India");
+
+// The no-map view: every place by country, then by trip.
+const byCountry = new Map<
+	string,
+	{ name: string; trip: (typeof trips)[number] }[]
+>();
+for (const trip of trips) {
+	for (const place of trip.data.places) {
+		byCountry.set(place.country, [
+			...(byCountry.get(place.country) ?? []),
+			{ name: place.name, trip },
+		]);
+	}
+}
+const countries = [...byCountry.entries()].sort(([a], [b]) =>
+	a.localeCompare(b),
+);
+---
+
+<Base title="Map" description="Every place I've travelled to." crumbs={[{ label: "Travel", href: "/travel/" }, { label: "Map" }]}>
+	<h1>Map</h1>
+	<p class="filters">
+		{pins.length} {pins.length === 1 ? "place" : "places"} in {countries.length}{" "}
+		{countries.length === 1 ? "country" : "countries"}. Each dot links to its trip.
+	</p>
+
+	<PlacesMap pins={pins} view="world" label="The world" />
+	<PlacesMap pins={indiaPins} view="india" label="India" />
+
+	<h2>All places</h2>
+	{countries.length === 0 && <p class="empty">No places yet.</p>}
+	<ul class="rows">
+		{
+			countries.map(([country, places]) => (
+				<li class="row">
+					<span class="meta">{country}</span>
+					<span>
+						{places.map(({ name, trip }, i) => (
+							<>
+								{i > 0 && ", "}
+								<a href={tripUrl(trip)} title={`${trip.data.title}, ${tripDates(trip)}`}>
+									{name}
+								</a>
+							</>
+						))}
+					</span>
+				</li>
+			))
+		}
+	</ul>
+</Base>

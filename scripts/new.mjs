@@ -4,6 +4,7 @@
 //   pnpm new note ["Title"] [--link https://…]
 //   pnpm new link https://… "Title"
 //   pnpm new page now|uses|…
+//   pnpm new trip "Ladakh" --start 2026-10-02 [--end 2026-10-12] --region india|world
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { parseArgs } from "node:util";
@@ -11,7 +12,13 @@ import { slugify, today } from "./drafts.mjs";
 
 const { values, positionals } = parseArgs({
 	allowPositionals: true,
-	options: { kind: { type: "string" }, link: { type: "string" } },
+	options: {
+		kind: { type: "string" },
+		link: { type: "string" },
+		start: { type: "string" },
+		end: { type: "string" },
+		region: { type: "string" },
+	},
 });
 const [type, ...args] = positionals;
 const date = today();
@@ -60,8 +67,37 @@ function draft() {
 				`---\ntitle: ${yaml(title)}\ndescription: ""\nupdated: ${date}\n---\n\n`,
 			];
 		}
+		case "trip": {
+			const [title] = args;
+			const { start, end, region } = values;
+			if (
+				!title ||
+				!/^\d{4}-\d{2}-\d{2}$/.test(start ?? "") ||
+				!["india", "world"].includes(region)
+			) {
+				throw new Error(
+					'usage: pnpm new trip "Title" --start YYYY-MM-DD [--end YYYY-MM-DD] --region india|world',
+				);
+			}
+			const lines = [
+				`title: ${yaml(title)}`,
+				`start: ${start}`,
+				...(end ? [`end: ${end}`] : []),
+				`region: ${region}`,
+				'summary: ""',
+				"# City-level only, for the map. Example:",
+				"#   - { name: McLeod Ganj, country: India, lat: 32.24, lng: 76.32 }",
+				"places: []",
+				"tags: []",
+				"photos: []",
+			];
+			return [
+				`drafts/trips/${start.slice(0, 7)}-${slugify(title)}/index.md`,
+				`---\n${lines.join("\n")}\n---\n\nThe story of the trip.\n`,
+			];
+		}
 		default:
-			throw new Error("usage: pnpm new post|note|link|page …");
+			throw new Error("usage: pnpm new post|note|link|page|trip …");
 	}
 }
 

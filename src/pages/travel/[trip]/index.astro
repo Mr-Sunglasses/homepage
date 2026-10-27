@@ -1,0 +1,92 @@
+---
+import { render } from "astro:content";
+import type { GetStaticPaths } from "astro";
+import EntryEnd from "@/components/EntryEnd.astro";
+import Gallery from "@/components/Gallery.astro";
+import Base from "@/layouts/Base.astro";
+import {
+	coverOf,
+	getTrips,
+	tripDates,
+	tripPlaces,
+	tripSlug,
+	tripUrl,
+} from "@/lib/content";
+import { photoFile, widthUpTo } from "@/lib/photos";
+
+export const getStaticPaths = (async () => {
+	const trips = await getTrips();
+	const published = trips.filter((t) => !t.isDraft);
+	return trips.map((trip) => {
+		const i = published.indexOf(trip);
+		return {
+			params: { trip: tripSlug(trip) },
+			props: {
+				trip,
+				newer: i > 0 ? published[i - 1] : undefined,
+				older: i >= 0 ? published[i + 1] : undefined,
+			},
+		};
+	});
+}) satisfies GetStaticPaths;
+
+const { trip, newer, older } = Astro.props;
+const { Content } = await render(trip);
+const { title, summary, photos, places, tags, fediverse } = trip.data;
+const cover = coverOf(trip);
+const og = cover
+	? photoFile(trip, cover, widthUpTo(cover, 1280), "webp")
+	: undefined;
+// Photos in the order they were taken; untimed ones keep their file order.
+const ordered = [...photos].sort(
+	(a, b) => (a.takenAt?.valueOf() ?? 0) - (b.takenAt?.valueOf() ?? 0),
+);
+---
+
+<Base
+	title={title}
+	description={summary || `Photos from ${title}.`}
+	image={og}
+	type="article"
+	isDraft={trip.isDraft}
+	crumbs={[{ label: "Travel", href: "/travel/" }, { label: title }]}
+>
+	<article>
+		<h1>{title}</h1>
+		<p class="entry-meta">
+			{tripDates(trip)}
+			{tripPlaces(trip) && <>{" · "}{tripPlaces(trip)}</>}
+			{" · "}{photos.length} {photos.length === 1 ? "photo" : "photos"}
+		</p>
+		{summary && <p class="lead">{summary}</p>}
+		<Content />
+
+		{
+			ordered.length > 0 && (
+				<section aria-label="Photos">
+					<Gallery items={ordered.map((photo) => ({ trip, photo }))} />
+				</section>
+			)
+		}
+
+		{
+			places.length > 0 && (
+				<p class="meta places">
+					Places: {places.map((p) => `${p.name} (${p.country})`).join(", ")} ·{" "}
+					<a href="/travel/map/">map</a>
+				</p>
+			)
+		}
+
+		<EntryEnd fediverse={fediverse} tags={tags}>
+			{
+				(newer || older) && (
+					<nav class="prev-next" aria-label="More trips">
+						<span>{older && <a href={tripUrl(older)}>← {older.data.title}</a>}</span>
+						<span>{newer && <a href={tripUrl(newer)}>{newer.data.title} →</a>}</span>
+					</nav>
+				)
+			}
+		</EntryEnd>
+	</article>
+</Base>

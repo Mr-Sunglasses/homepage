@@ -18,7 +18,7 @@ const pages = (await getPages()).filter((page) => page.isDraft);
 <Base title="Drafts" isDraft crumbs={[{ label: "Drafts" }]}>
 	<h1>Drafts</h1>
 	<p class="filters">
-		Files in <code>drafts/</code>. They never leave this machine. Publish one with
+		Files in <code>drafts/</code>. They never leave this machine. Publish one with{" "}
 		<code>pnpm promote drafts/…</code>.
 	</p>
 	<YearList items={items} showSection empty="No drafts." />

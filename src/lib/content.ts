@@ -1,12 +1,13 @@
 import { type CollectionEntry, getCollection } from "astro:content";
 
-type Published = "posts" | "notes" | "links" | "pages";
+type Published = "posts" | "notes" | "links" | "pages" | "trips";
 
 const draftCollection: Record<Published, string> = {
 	posts: "postDrafts",
 	notes: "noteDrafts",
 	links: "linkDrafts",
 	pages: "pageDrafts",
+	trips: "tripDrafts",
 };
 
 export type Entry<C extends Published> = CollectionEntry<C> & {
@@ -16,6 +17,8 @@ export type Post = Entry<"posts">;
 export type Note = Entry<"notes">;
 export type Link = Entry<"links">;
 export type Page = Entry<"pages">;
+export type Trip = Entry<"trips">;
+export type Photo = Trip["data"]["photos"][number];
 
 // Published entries, plus drafts when running `astro dev`.
 async function load<C extends Published>(name: C): Promise<Entry<C>[]> {
@@ -37,6 +40,10 @@ export const getPosts = async () => (await load("posts")).sort(newestFirst);
 export const getNotes = async () => (await load("notes")).sort(newestFirst);
 export const getLinks = async () => (await load("links")).sort(newestFirst);
 export const getPages = () => load("pages");
+export const getTrips = async () =>
+	(await load("trips")).sort(
+		(a, b) => b.data.start.valueOf() - a.data.start.valueOf(),
+	);
 
 export const kinds = {
 	article: { label: "Articles", slug: "articles" },
@@ -54,6 +61,41 @@ export const noteSlug = (note: Note) => note.id.split("/").pop() as string;
 export const noteUrl = (note: Note) => `/notes/${noteSlug(note)}/`;
 export const linkAnchor = (link: Link) => link.id.split("/").pop() as string;
 export const linkUrl = (link: Link) => `/links/#${linkAnchor(link)}`;
+// Trips are stored as trips/<slug>/index.md.
+export const tripSlug = (trip: Trip) => trip.id.replace(/\/index$/, "");
+export const tripUrl = (trip: Trip) => `/travel/${tripSlug(trip)}/`;
+export const photoUrl = (trip: Trip, photo: Photo) =>
+	`${tripUrl(trip)}${photo.id}/`;
+
+const MONTH = { month: "short", timeZone: "UTC" } as const;
+const MONTH_YEAR = {
+	month: "short",
+	year: "numeric",
+	timeZone: "UTC",
+} as const;
+/** "Oct 2026", or "Sep – Oct 2026" / "Dec 2025 – Jan 2026" across months. */
+export function tripDates(trip: Trip) {
+	const { start, end } = trip.data;
+	const last = end ?? start;
+	if (isoMonth(start) === isoMonth(last)) {
+		return start.toLocaleDateString("en-GB", MONTH_YEAR);
+	}
+	const sameYear = start.getUTCFullYear() === last.getUTCFullYear();
+	return `${start.toLocaleDateString("en-GB", sameYear ? MONTH : MONTH_YEAR)} – ${last.toLocaleDateString("en-GB", MONTH_YEAR)}`;
+}
+
+export const tripCountries = (trip: Trip) =>
+	[...new Set(trip.data.places.map((p) => p.country))].join(", ") ||
+	(trip.data.region === "india" ? "India" : "");
+
+/** The places of a trip as a short line: "McLeod Ganj, Dharamshala · India". */
+export function tripPlaces(trip: Trip) {
+	const names = trip.data.places.map((p) => p.name).join(", ");
+	return [names, tripCountries(trip)].filter(Boolean).join(" · ");
+}
+
+export const coverOf = (trip: Trip) =>
+	trip.data.photos.find((p) => p.id === trip.data.cover) ?? trip.data.photos[0];
 
 export const isoDate = (date: Date) => date.toISOString().slice(0, 10);
 export const isoMonth = (date: Date) => date.toISOString().slice(0, 7);
@@ -98,7 +140,7 @@ export type Item = {
 	title: string;
 	href: string;
 	// What kind of thing it is, shown on mixed lists (archive, tags).
-	label: Kind | "note" | "link";
+	label: Kind | "note" | "link" | "trip";
 	detail?: string;
 	tags: string[];
 	isDraft: boolean;
@@ -136,16 +178,35 @@ export const linkItem = (link: Link): Item => ({
 	external: true,
 });
 
+export const tripItem = (trip: Trip): Item => ({
+	date: trip.data.start,
+	title: trip.data.title,
+	href: tripUrl(trip),
+	label: "trip",
+	detail: [
+		tripCountries(trip),
+		trip.data.photos.length > 0
+			? `${trip.data.photos.length} photo${trip.data.photos.length === 1 ? "" : "s"}`
+			: null,
+	]
+		.filter(Boolean)
+		.join(" · "),
+	tags: trip.data.tags,
+	isDraft: trip.isDraft,
+});
+
 export async function getAllItems() {
-	const [posts, notes, links] = await Promise.all([
+	const [posts, notes, links, trips] = await Promise.all([
 		getPosts(),
 		getNotes(),
 		getLinks(),
+		getTrips(),
 	]);
 	return [
 		...posts.map(postItem),
 		...notes.map(noteItem),
 		...links.map(linkItem),
+		...trips.map(tripItem),
 	].sort((a, b) => b.date.valueOf() - a.date.valueOf());
 }
 

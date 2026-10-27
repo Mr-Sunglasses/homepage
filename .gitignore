@@ -9,9 +9,13 @@ node_modules/
 # Secrets (S3 keys for the photo scripts)
 .env
 .env.*
+!.env.example
 
 # Full-size photo originals belong in the photo stores, not in git
 *-original.*
 
 .DS_Store
 .claude/
+
+# Local photo stores (scripts/dev-stores.sh)
+/.dev-stores/

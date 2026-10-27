@@ -33,6 +33,8 @@ try {
 
 	const date = today();
 	const isPage = source.startsWith("drafts/pages/");
+	// Trips are dated by their `start`, which publishing doesn't change.
+	const isTrip = source.startsWith("drafts/trips/");
 	let text = readFileSync(source, "utf8");
 	const current = text.match(/^date:\s*(\S+)/m)?.[1];
 	const publishDate = values["keep-date"] && current ? current : date;
@@ -40,9 +42,8 @@ try {
 	const dest = publishedPath(source, publishDate);
 	if (existsSync(dest)) throw new Error(`${dest} already exists`);
 
-	text = isPage
-		? setFrontmatter(text, "updated", date)
-		: setFrontmatter(text, "date", publishDate);
+	if (isPage) text = setFrontmatter(text, "updated", date);
+	else if (!isTrip) text = setFrontmatter(text, "date", publishDate);
 
 	// Copy referenced images next to the published file, at the same relative path.
 	const assets = relativeRefs(text).map((ref) => ({

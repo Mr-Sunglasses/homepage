@@ -1,0 +1,32 @@
+---
+import type { Photo, Trip } from "@/lib/content";
+import { photoFile, srcset, widthUpTo } from "@/lib/photos";
+
+// One trip photo: AVIF with a WebP fallback, sized by the browser from
+// `sizes`. Width and height are set so nothing jumps while loading, and the
+// photo's own dominant colour shows until it arrives.
+interface Props {
+	trip: Trip;
+	photo: Photo;
+	sizes: string;
+	eager?: boolean;
+	class?: string;
+}
+
+const { trip, photo, sizes, eager = false, class: className } = Astro.props;
+---
+
+<picture class={className}>
+	<source type="image/avif" srcset={srcset(trip, photo, "avif")} sizes={sizes} />
+	<img
+		src={photoFile(trip, photo, widthUpTo(photo, 1280), "webp")}
+		srcset={srcset(trip, photo, "webp")}
+		sizes={sizes}
+		width={photo.width}
+		height={photo.height}
+		alt={photo.alt}
+		loading={eager ? "eager" : "lazy"}
+		decoding="async"
+		style={photo.color ? `background-color: ${photo.color}` : undefined}
+	/>
+</picture>

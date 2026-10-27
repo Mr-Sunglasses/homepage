@@ -1,0 +1,94 @@
+---
+import { geoEqualEarth, geoMercator, geoPath } from "d3-geo";
+import type { Feature, MultiPolygon } from "geojson";
+import { feature } from "topojson-client";
+import type { GeometryCollection, Topology } from "topojson-specification";
+import land50 from "world-atlas/land-50m.json";
+import land110 from "world-atlas/land-110m.json";
+
+// A map drawn at build time as plain SVG: no tiles, no third-party
+// requests, no JavaScript. Land only, without country borders (open map
+// data draws some of India's borders differently from India's official map).
+export type Pin = {
+	name: string;
+	country: string;
+	lat: number;
+	lng: number;
+	href: string;
+	trip: string;
+};
+
+interface Props {
+	pins: Pin[];
+	view: "world" | "india";
+	label: string;
+}
+
+const { pins, view, label } = Astro.props;
+const W = 960;
+const H = view === "world" ? 470 : 640;
+
+const topo = (view === "world" ? land110 : land50) as unknown as Topology<{
+	land: GeometryCollection;
+}>;
+const land = feature(
+	topo,
+	topo.objects.land,
+) as unknown as Feature<MultiPolygon>;
+
+// India view: the subcontinent's bounding box.
+const southAsia: Feature<MultiPolygon> = {
+	type: "Feature",
+	properties: {},
+	geometry: {
+		type: "MultiPolygon",
+		// Clockwise, which d3 reads as "this box" (the other way is "everything but").
+		coordinates: [
+			[
+				[
+					[67, 6],
+					[67, 37.5],
+					[98, 37.5],
+					[98, 6],
+					[67, 6],
+				],
+			],
+		],
+	},
+};
+const projection =
+	view === "world"
+		? geoEqualEarth().fitSize([W, H], { type: "Sphere" })
+		: geoMercator()
+				.fitSize([W, H], southAsia)
+				.clipExtent([
+					[0, 0],
+					[W, H],
+				]);
+const path = geoPath(projection).digits(1);
+const outline = view === "world" ? path({ type: "Sphere" }) : null;
+
+const points = pins
+	.map((pin) => ({ pin, xy: projection([pin.lng, pin.lat]) }))
+	.filter(
+		(p): p is { pin: Pin; xy: [number, number] } =>
+			!!p.xy && p.xy[0] >= 0 && p.xy[0] <= W && p.xy[1] >= 0 && p.xy[1] <= H,
+	);
+---
+
+<figure class="map">
+	<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby={`map-${view}`}>
+		<title id={`map-${view}`}>{label}</title>
+		{outline && <path class="map-sphere" d={outline} />}
+		<path class="map-land" d={path(land) ?? ""} />
+		{
+			points.map(({ pin, xy: [x, y] }) => (
+				<a href={pin.href}>
+					<title>{`${pin.name}, ${pin.country}: ${pin.trip}`}</title>
+					<circle class="map-pin" cx={x.toFixed(1)} cy={y.toFixed(1)} r={view === "world" ? 5 : 7} />
+				</a>
+			))
+		}
+	</svg>
+	<figcaption class="meta">{label} · {points.length} {points.length === 1 ? "place" : "places"}</figcaption>
+</figure>

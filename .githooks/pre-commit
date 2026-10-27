@@ -1,3 +1,4 @@
 #!/bin/sh
-# Drafts never leave this machine.
-exec node scripts/check-no-drafts.mjs --staged
+# Drafts never leave this machine, and images carry no private metadata.
+node scripts/check-no-drafts.mjs --staged || exit 1
+exec node scripts/check-image-metadata.mjs --staged

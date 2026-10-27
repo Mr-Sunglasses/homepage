@@ -1,9 +1,68 @@
 ---
+import Picture from "@/components/Picture.astro";
 import Base from "@/layouts/Base.astro";
+import {
+	coverOf,
+	getTrips,
+	type Trip,
+	tripDates,
+	tripPlaces,
+	tripUrl,
+} from "@/lib/content";
+
+const trips = await getTrips();
+const regions: { title: string; trips: Trip[] }[] = [
+	{ title: "India", trips: trips.filter((t) => t.data.region === "india") },
+	{
+		title: "Around the world",
+		trips: trips.filter((t) => t.data.region === "world"),
+	},
+].filter((region) => region.trips.length > 0);
+const photoCount = trips.reduce((n, t) => n + t.data.photos.length, 0);
 ---
 
-<Base title="Travel" description="Trips around India and the world." crumbs={[{ label: "Travel" }]}>
+<Base title="Travel" description="Trips around India and the world, with photos." crumbs={[{ label: "Travel" }]}>
 	<h1>Travel</h1>
-	<p>Stories and photos from trips around India and the world, with a map of every place.</p>
-	<p class="empty">The first trips are on their way.</p>
+	<p class="filters">
+		{trips.length} {trips.length === 1 ? "trip" : "trips"} · {photoCount} {photoCount === 1 ? "photo" : "photos"} ·{" "}
+		<a href="/travel/map/">map</a> · <a href="/photos/">all photos</a> · <a href="/travel/rss.xml">rss</a>
+	</p>
+
+	{trips.length === 0 && <p class="empty">The first trips are on their way.</p>}
+
+	{
+		regions.map(({ title, trips }) => (
+			<section>
+				<h2 class="year">{title}</h2>
+				<ul class="trips">
+					{trips.map((trip) => {
+						const cover = coverOf(trip);
+						return (
+							<li class="trip">
+								<a href={tripUrl(trip)} class="trip-cover" tabindex="-1" aria-hidden="true">
+									{cover ? (
+										<Picture trip={trip} photo={cover} sizes="9rem" class="cover" />
+									) : (
+										<span class="cover cover-empty" />
+									)}
+								</a>
+								<div class="trip-text">
+									<a href={tripUrl(trip)} class="trip-title">
+										{trip.data.title}
+									</a>
+									{trip.isDraft && <span class="draft-mark">draft</span>}
+									<span class="meta">
+										{tripDates(trip)} · {trip.data.photos.length}{" "}
+										{trip.data.photos.length === 1 ? "photo" : "photos"}
+									</span>
+									{tripPlaces(trip) && <span class="trip-places">{tripPlaces(trip)}</span>}
+									{trip.data.summary && <span class="trip-summary">{trip.data.summary}</span>}
+								</div>
+							</li>
+						);
+					})}
+				</ul>
+			</section>
+		))
+	}
 </Base>

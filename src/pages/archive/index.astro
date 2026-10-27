@@ -13,7 +13,9 @@ for (const item of items) {
 			? "notes"
 			: item.label === "link"
 				? "links"
-				: "writing";
+				: item.label === "trip"
+					? "trips"
+					: "writing";
 	counts[key] = (counts[key] ?? 0) + 1;
 	years.set(year, counts);
 }
@@ -21,6 +23,7 @@ const nouns: Record<string, [string, string]> = {
 	writing: ["piece of writing", "pieces of writing"],
 	notes: ["note", "notes"],
 	links: ["link", "links"],
+	trips: ["trip", "trips"],
 };
 const describe = (counts: Record<string, number>) =>
 	Object.entries(nouns)

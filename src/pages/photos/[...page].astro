@@ -1,0 +1,55 @@
+---
+import type { GetStaticPaths } from "astro";
+import Gallery from "@/components/Gallery.astro";
+import Pager from "@/components/Pager.astro";
+import Base from "@/layouts/Base.astro";
+import {
+	getTrips,
+	type Photo,
+	type Trip,
+	tripDates,
+	tripUrl,
+} from "@/lib/content";
+import { allPhotos, PHOTOS_PER_PAGE } from "@/lib/photos";
+
+// /photos/, /photos/2/, … every photo, newest first, grouped by trip.
+export const getStaticPaths = (async ({ paginate }) =>
+	paginate(allPhotos(await getTrips()), {
+		pageSize: PHOTOS_PER_PAGE,
+	})) satisfies GetStaticPaths;
+
+const { page } = Astro.props;
+const items = page.data as { trip: Trip; photo: Photo }[];
+const groups: { trip: Trip; items: typeof items }[] = [];
+for (const item of items) {
+	const last = groups.at(-1);
+	if (last?.trip === item.trip) last.items.push(item);
+	else groups.push({ trip: item.trip, items: [item] });
+}
+---
+
+<Base
+	title={page.currentPage > 1 ? `Photos, page ${page.currentPage}` : "Photos"}
+	description="Every photo from my trips, newest first."
+	crumbs={[{ label: "Photos" }]}
+>
+	<h1>Photos</h1>
+	<p class="filters">
+		{page.total} photos from my <a href="/travel/">trips</a>, newest first.
+	</p>
+	{page.total === 0 && <p class="empty">The first photos are on their way.</p>}
+	{
+		groups.map(({ trip, items }) => (
+			<section>
+				<div class="section-head">
+					<h2>
+						<a href={tripUrl(trip)}>{trip.data.title}</a>
+					</h2>
+					<span class="meta">{tripDates(trip)}</span>
+				</div>
+				<Gallery items={items} />
+			</section>
+		))
+	}
+	<Pager page={page} />
+</Base>

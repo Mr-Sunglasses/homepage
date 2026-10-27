@@ -26,7 +26,8 @@ export function hasDraftKey(text) {
 	return /^draft\s*:/m.test(frontmatter);
 }
 
-const git = (...args) => execFileSync("git", args, { encoding: "utf8" });
+const git = (...args) =>
+	execFileSync("git", args, { encoding: "utf8", maxBuffer: 512 * 1024 * 1024 });
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
 	const staged = process.argv.includes("--staged");

@@ -1,0 +1,34 @@
+---
+import Picture from "@/components/Picture.astro";
+import type { Photo, Trip } from "@/lib/content";
+import { photoUrl } from "@/lib/content";
+
+// A justified grid: every row fills the width and keeps each photo's shape.
+// Pure CSS (see .gallery in global.css): each tile grows in proportion to
+// its aspect ratio, so all tiles in a row end up the same height.
+interface Props {
+	items: { trip: Trip; photo: Photo }[];
+}
+
+const { items } = Astro.props;
+---
+
+<ul class="gallery">
+	{
+		items.map(({ trip, photo }, i) => {
+			const ratio = photo.width / photo.height;
+			return (
+				<li style={`--r: ${ratio.toFixed(4)}`}>
+					<a href={photoUrl(trip, photo)} title={photo.caption ?? photo.alt}>
+						<Picture
+							trip={trip}
+							photo={photo}
+							sizes={`${Math.min(Math.round(ratio * 260), 760)}px`}
+							eager={i < 4}
+						/>
+					</a>
+				</li>
+			);
+		})
+	}
+</ul>
