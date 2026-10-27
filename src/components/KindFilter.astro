@@ -1,0 +1,26 @@
+---
+import { type Kind, kinds } from "@/lib/content";
+
+interface Props {
+	active?: Kind;
+	available: Kind[];
+}
+
+const { active, available } = Astro.props;
+---
+
+<p class="filters">
+	Show:
+	<a href="/writing/" aria-current={active ? undefined : "page"}>all</a>
+	{
+		available.map((kind) => (
+			<>
+				{" · "}
+				<a href={`/writing/${kinds[kind].slug}/`} aria-current={kind === active ? "page" : undefined}>
+					{kinds[kind].label.toLowerCase()}
+				</a>
+			</>
+		))
+	}
+	· <a href="/writing/rss.xml">rss</a>
+</p>

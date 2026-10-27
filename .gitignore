@@ -1,0 +1,17 @@
+# Drafts never leave this machine. See scripts/check-no-drafts.mjs.
+/drafts/
+
+# Build output and dependencies
+dist/
+.astro/
+node_modules/
+
+# Secrets (S3 keys for the photo scripts)
+.env
+.env.*
+
+# Full-size photo originals belong in the photo stores, not in git
+*-original.*
+
+.DS_Store
+.claude/

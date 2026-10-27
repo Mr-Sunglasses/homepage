@@ -1,0 +1,73 @@
+---
+import { getImage } from "astro:assets";
+import { render } from "astro:content";
+import type { GetStaticPaths } from "astro";
+import EntryEnd from "@/components/EntryEnd.astro";
+import Base from "@/layouts/Base.astro";
+import {
+	getPosts,
+	isoDate,
+	kinds,
+	postUrl,
+	readingMinutes,
+} from "@/lib/content";
+
+// Paths match the old blog (/posts/<slug>/, /posts/poems/<slug>/) so links keep working.
+export const getStaticPaths = (async () => {
+	const posts = await getPosts();
+	const published = posts.filter((post) => !post.isDraft);
+	return posts.map((post) => {
+		const i = published.indexOf(post);
+		return {
+			params: { slug: post.id },
+			props: {
+				post,
+				newer: i > 0 ? published[i - 1] : undefined,
+				older: i >= 0 ? published[i + 1] : undefined,
+			},
+		};
+	});
+}) satisfies GetStaticPaths;
+
+const { post, newer, older } = Astro.props;
+const { Content } = await render(post);
+const { title, date, updated, description, kind, tags, image, fediverse } =
+	post.data;
+const og = image
+	? await getImage({ src: image, width: 1200, format: "jpg" })
+	: undefined;
+const kindLabel = kinds[kind].label;
+---
+
+<Base
+	title={title}
+	description={description || undefined}
+	image={og?.src}
+	type="article"
+	isDraft={post.isDraft}
+	crumbs={[
+		{ label: "Writing", href: "/writing/" },
+		{ label: kindLabel, href: `/writing/${kinds[kind].slug}/` },
+		{ label: title },
+	]}
+>
+	<article>
+		<h1>{title}</h1>
+		<p class="entry-meta">
+			<time datetime={isoDate(date)}>{isoDate(date)}</time>
+			{updated && <> · updated <time datetime={isoDate(updated)}>{isoDate(updated)}</time></>}
+			· {readingMinutes(post.body)} min read
+		</p>
+		<Content />
+		<EntryEnd fediverse={fediverse} tags={tags}>
+			{
+				(newer || older) && (
+					<nav class="prev-next" aria-label="More writing">
+						<span>{older && <a href={postUrl(older)}>← {older.data.title}</a>}</span>
+						<span>{newer && <a href={postUrl(newer)}>{newer.data.title} →</a>}</span>
+					</nav>
+				)
+			}
+		</EntryEnd>
+	</article>
+</Base>

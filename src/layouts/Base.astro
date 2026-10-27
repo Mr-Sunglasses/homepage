@@ -1,0 +1,115 @@
+---
+import { elsewhere, nav, site } from "@/config";
+import "@/styles/global.css";
+
+export type Crumb = { label: string; href?: string };
+
+interface Props {
+	title?: string;
+	description?: string;
+	image?: string;
+	crumbs?: Crumb[];
+	isDraft?: boolean;
+	type?: "website" | "article";
+}
+
+const {
+	title,
+	description = site.description,
+	image = "/og.png",
+	crumbs = [],
+	isDraft = false,
+	type = "website",
+} = Astro.props;
+
+const pageTitle = title ? `${title} · ${site.name}` : site.name;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const imageUrl = new URL(image, Astro.site);
+const path = Astro.url.pathname;
+const current = (href: string) =>
+	href === "/" ? path === "/" : path.startsWith(href);
+---
+
+<!doctype html>
+<html lang={site.lang}>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>{pageTitle}</title>
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonical} />
+		{isDraft && <meta name="robots" content="noindex, nofollow" />}
+		<meta name="color-scheme" content="light dark" />
+
+		<meta property="og:site_name" content={site.name} />
+		<meta property="og:type" content={type} />
+		<meta property="og:title" content={title ?? site.name} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonical} />
+		<meta property="og:image" content={imageUrl} />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:image" content={imageUrl} />
+		<meta name="fediverse:creator" content={site.fediverse.handle.slice(1)} />
+		<link rel="me" href={site.fediverse.url} />
+
+		<link rel="alternate" type="application/rss+xml" title={`${site.name}: everything`} href="/rss.xml" />
+		<link rel="alternate" type="application/rss+xml" title={`${site.name}: writing`} href="/writing/rss.xml" />
+		<link rel="alternate" type="application/rss+xml" title={`${site.name}: notes`} href="/notes/rss.xml" />
+		<link rel="alternate" type="application/rss+xml" title={`${site.name}: links`} href="/links/rss.xml" />
+
+		<link rel="icon" href="/favicon/favicon-light-32.png" sizes="32x32" media="(prefers-color-scheme: light)" />
+		<link rel="icon" href="/favicon/favicon-dark-32.png" sizes="32x32" media="(prefers-color-scheme: dark)" />
+		<link rel="apple-touch-icon" href="/favicon/favicon-light-180.png" />
+		<link rel="sitemap" href="/sitemap-index.xml" />
+		<slot name="head" />
+	</head>
+	<body>
+		<a class="skip" href="#main">Skip to content</a>
+		<header class="site-header">
+			<a class="site-name" href="/">{site.name}</a>
+			<nav class="site-nav" aria-label="Sections">
+				<ul>
+					{
+						nav.map((item) => (
+							<li>
+								<a href={item.href} aria-current={current(item.href) ? "page" : undefined}>
+									{item.label}
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</nav>
+		</header>
+
+		{
+			crumbs.length > 0 && (
+				<nav class="crumbs" aria-label="Breadcrumb">
+					<ol>
+						<li>
+							<a href="/">Home</a>
+						</li>
+						{crumbs.map((crumb) => (
+							<li>{crumb.href ? <a href={crumb.href}>{crumb.label}</a> : <span aria-current="page">{crumb.label}</span>}</li>
+						))}
+					</ol>
+				</nav>
+			)
+		}
+
+		<main id="main">
+			{isDraft && <p class="draft-bar">DRAFT: only visible on this machine. Publish with <code>pnpm promote</code>.</p>}
+			<slot />
+		</main>
+
+		<footer class="site-footer">
+			<ul class="inline-list">
+				{elsewhere.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
+			</ul>
+			<p>
+				Content <a href={site.license.url}>{site.license.name}</a> · No tracking · No JavaScript needed
+				· <a href={site.source}>Source</a>
+			</p>
+		</footer>
+	</body>
+</html>

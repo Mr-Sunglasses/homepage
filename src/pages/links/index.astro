@@ -1,0 +1,59 @@
+---
+import { render } from "astro:content";
+import Base from "@/layouts/Base.astro";
+import {
+	domainOf,
+	getLinks,
+	isoDate,
+	isoMonth,
+	linkAnchor,
+	monthName,
+	tagSlug,
+} from "@/lib/content";
+
+const links = await getLinks();
+const rendered = await Promise.all(
+	links.map(async (link) => ({ link, Content: (await render(link)).Content })),
+);
+const months = new Map<string, typeof rendered>();
+for (const entry of rendered) {
+	const key = isoMonth(entry.link.data.date);
+	months.set(key, [...(months.get(key) ?? []), entry]);
+}
+---
+
+<Base title="Links" description="Things worth reading, with a line on why." crumbs={[{ label: "Links" }]}>
+	<h1>Links</h1>
+	<p class="filters">Things I think are worth your time, and why. <a href="/links/rss.xml">rss</a></p>
+
+	{links.length === 0 && <p class="empty">No links yet.</p>}
+	{
+		[...months.values()].map((entries) => (
+			<section>
+				<h2 class="year">{monthName(entries[0].link.data.date)}</h2>
+				{entries.map(({ link, Content }) => (
+					<article class="link" id={linkAnchor(link)}>
+						<h3>
+							<a href={link.data.url}>{link.data.title}</a> <span class="meta">({domainOf(link.data.url)})</span>
+						</h3>
+						<p class="meta">
+							<a href={`#${linkAnchor(link)}`}>
+								<time datetime={isoDate(link.data.date)}>{isoDate(link.data.date)}</time>
+							</a>
+							{link.data.via && <> · via {link.data.via}</>}
+							{link.data.tags.map((tag) => (
+								<>
+									{" · "}
+									<a href={`/tags/${tagSlug(tag)}/`}>{tag}</a>
+								</>
+							))}
+							{link.data.fediverse && <> · <a href={link.data.fediverse}>reply on Fosstodon</a></>}
+							{link.isDraft && <span class="draft-mark">draft</span>}
+						</p>
+						<Content />
+					</article>
+				))}
+			</section>
+		))
+	}
+</Base>

@@ -1,0 +1,27 @@
+---
+import type { GetStaticPaths } from "astro";
+import NoteBody from "@/components/NoteBody.astro";
+import Base from "@/layouts/Base.astro";
+import { getNotes, isoMonth, monthName } from "@/lib/content";
+
+export const getStaticPaths = (async () => {
+	const notes = await getNotes();
+	const months = new Map<string, typeof notes>();
+	for (const note of notes) {
+		const key = isoMonth(note.data.date);
+		months.set(key, [...(months.get(key) ?? []), note]);
+	}
+	return [...months.entries()].map(([key, notes]) => {
+		const [year, month] = key.split("-");
+		return { params: { year, month }, props: { notes } };
+	});
+}) satisfies GetStaticPaths;
+
+const { notes } = Astro.props;
+const label = monthName(notes[0].data.date);
+---
+
+<Base title={`Notes, ${label}`} crumbs={[{ label: "Notes", href: "/notes/" }, { label }]}>
+	<h1>Notes, {label}</h1>
+	{notes.map((note) => <NoteBody note={note} />)}
+</Base>

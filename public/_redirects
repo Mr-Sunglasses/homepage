@@ -1,0 +1,13 @@
+# The old blog subdomain: same paths on the main domain.
+https://blog.kanishkk.xyz/*  https://kanishkk.xyz/:splat  301!
+
+# Old blog (Fuwari) pages that moved.
+/2/              /writing/           301
+/3/              /writing/           301
+/4/              /writing/           301
+/poems/          /writing/poems/     301
+/poems/*         /writing/poems/     301
+/posts/contact-me/  /contact/        301
+
+# Links from the blog before it moved to Astro (?action=view&url=<slug>).
+/ action=view url=:slug  /posts/:slug/  301

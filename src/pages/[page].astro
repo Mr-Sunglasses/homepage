@@ -1,0 +1,22 @@
+---
+import { render } from "astro:content";
+import type { GetStaticPaths } from "astro";
+import Base from "@/layouts/Base.astro";
+import { getPages, isoDate } from "@/lib/content";
+
+// Standalone pages: about, contact, now, uses.
+export const getStaticPaths = (async () => {
+	const pages = await getPages();
+	return pages.map((page) => ({ params: { page: page.id }, props: { page } }));
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props;
+const { Content } = await render(page);
+const { title, description, updated } = page.data;
+---
+
+<Base title={title} description={description || undefined} isDraft={page.isDraft} crumbs={[{ label: title }]}>
+	<h1>{title}</h1>
+	{updated && <p class="entry-meta">Updated <time datetime={isoDate(updated)}>{isoDate(updated)}</time></p>}
+	<Content />
+</Base>

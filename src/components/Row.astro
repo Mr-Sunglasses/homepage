@@ -1,0 +1,23 @@
+---
+import { type Item, isoDate } from "@/lib/content";
+
+interface Props {
+	item: Item;
+	showSection?: boolean;
+}
+
+const { item, showSection = false } = Astro.props;
+const meta = [showSection ? item.section.toLowerCase() : null, ...item.tags]
+	.filter(Boolean)
+	.join(" · ");
+---
+
+<li class="row">
+	<time datetime={isoDate(item.date)}>{isoDate(item.date)}</time>
+	<span>
+		<a href={item.href}>{item.title}</a>
+		{item.detail && <span class="detail">{item.detail}</span>}
+		{item.isDraft && <span class="draft-mark">draft</span>}
+	</span>
+	<span class="tags">{meta}</span>
+</li>

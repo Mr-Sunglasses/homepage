@@ -1,0 +1,3 @@
+#!/bin/sh
+# Drafts never leave this machine.
+exec node scripts/check-no-drafts.mjs --staged

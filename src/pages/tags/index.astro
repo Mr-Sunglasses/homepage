@@ -1,0 +1,27 @@
+---
+import Base from "@/layouts/Base.astro";
+import { getAllItems, tagSlug } from "@/lib/content";
+
+const items = await getAllItems();
+const counts = new Map<string, { name: string; count: number }>();
+for (const tag of items.flatMap((item) => item.tags)) {
+	const slug = tagSlug(tag);
+	const entry = counts.get(slug) ?? { name: tag, count: 0 };
+	counts.set(slug, { ...entry, count: entry.count + 1 });
+}
+const tags = [...counts.entries()].sort(([a], [b]) => a.localeCompare(b));
+---
+
+<Base title="Tags" crumbs={[{ label: "Tags" }]}>
+	<h1>Tags</h1>
+	<p class="filters">Every tag across writing, notes and links.</p>
+	<ul class="inline-list">
+		{
+			tags.map(([slug, { name, count }]) => (
+				<li>
+					<a href={`/tags/${slug}/`}>{name}</a> <span class="meta">{count}</span>
+				</li>
+			))
+		}
+	</ul>
+</Base>

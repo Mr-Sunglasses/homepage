@@ -1,0 +1,33 @@
+---
+import { render } from "astro:content";
+import { domainOf, isoDate, type Note, noteUrl } from "@/lib/content";
+
+// One note in full. Notes with `link` lead with the thing being commented on.
+interface Props {
+	note: Note;
+	headingLevel?: 1 | 2;
+}
+
+const { note, headingLevel = 2 } = Astro.props;
+const { Content } = await render(note);
+const { date, title, link, linkTitle } = note.data;
+const Heading = headingLevel === 1 ? "h1" : "h2";
+---
+
+<article class="note" id={note.id.split("/").pop()}>
+	<p class="meta">
+		<a href={noteUrl(note)}><time datetime={isoDate(date)}>{isoDate(date)}</time></a>
+		{note.isDraft && <span class="draft-mark">draft</span>}
+	</p>
+	{
+		link ? (
+			<Heading>
+				↗ <a href={link}>{linkTitle ?? title ?? domainOf(link)}</a> <span class="meta">({domainOf(link)})</span>
+			</Heading>
+		) : (
+			title && <Heading>{title}</Heading>
+		)
+	}
+	<Content />
+	<slot />
+</article>

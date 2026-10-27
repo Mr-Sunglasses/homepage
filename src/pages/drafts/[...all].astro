@@ -1,0 +1,41 @@
+---
+import type { GetStaticPaths } from "astro";
+import YearList from "@/components/YearList.astro";
+import Base from "@/layouts/Base.astro";
+import { getAllItems, getPages } from "@/lib/content";
+
+// Lists every draft. Exists only under `astro dev`; production builds
+// produce no /drafts/ page at all.
+export const getStaticPaths = (() =>
+	import.meta.env.DEV
+		? [{ params: { all: undefined } }]
+		: []) satisfies GetStaticPaths;
+
+const items = (await getAllItems()).filter((item) => item.isDraft);
+const pages = (await getPages()).filter((page) => page.isDraft);
+---
+
+<Base title="Drafts" isDraft crumbs={[{ label: "Drafts" }]}>
+	<h1>Drafts</h1>
+	<p class="filters">
+		Files in <code>drafts/</code>. They never leave this machine. Publish one with
+		<code>pnpm promote drafts/…</code>.
+	</p>
+	<YearList items={items} showSection empty="No drafts." />
+	{
+		pages.length > 0 && (
+			<>
+				<h2 class="year">Pages</h2>
+				<ul class="rows">
+					{pages.map((page) => (
+						<li class="row">
+							<span />
+							<a href={`/${page.id}/`}>{page.data.title}</a>
+							<span class="tags">page</span>
+						</li>
+					))}
+				</ul>
+			</>
+		)
+	}
+</Base>

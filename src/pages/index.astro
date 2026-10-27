@@ -1,0 +1,71 @@
+---
+import { render } from "astro:content";
+import Section from "@/components/Section.astro";
+import { site } from "@/config";
+import Base from "@/layouts/Base.astro";
+import {
+	getLinks,
+	getNotes,
+	getPages,
+	getPosts,
+	isoDate,
+	linkItem,
+	noteItem,
+	postItem,
+} from "@/lib/content";
+
+const LATEST = 5;
+const [posts, notes, links, pages] = await Promise.all([
+	getPosts(),
+	getNotes(),
+	getLinks(),
+	getPages(),
+]);
+const now = pages.find((page) => page.id === "now");
+const Now = now ? (await render(now)).Content : null;
+---
+
+<Base>
+	<p>{site.intro}</p>
+
+	{
+		now && Now && (
+			<section>
+				<div class="section-head">
+					<h2>
+						<a href="/now/">Now</a>
+						{now.isDraft && <span class="draft-mark">draft</span>}
+					</h2>
+					{now.data.updated && <span class="meta">updated {isoDate(now.data.updated)}</span>}
+				</div>
+				<Now />
+			</section>
+		)
+	}
+
+	<Section
+		title="Notes"
+		href="/notes/"
+		more="all notes"
+		items={notes.slice(0, LATEST).map(noteItem)}
+		empty="No notes yet."
+	/>
+
+	<Section
+		title="Writing"
+		href="/writing/"
+		more="all writing"
+		items={posts.slice(0, LATEST).map(postItem)}
+		empty="Nothing published yet."
+	/>
+
+	<Section title="Travel" href="/travel/" more="all trips" items={[]} empty="Trips and photos from India and abroad are on their way." />
+
+	<Section
+		title="Links"
+		href="/links/"
+		more="all links"
+		items={links.slice(0, LATEST).map(linkItem)}
+		empty="No links yet."
+	/>
+</Base>

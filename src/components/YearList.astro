@@ -1,0 +1,27 @@
+---
+import Row from "@/components/Row.astro";
+import { groupByYear, type Item } from "@/lib/content";
+
+interface Props {
+	items: Item[];
+	showSection?: boolean;
+	empty?: string;
+}
+
+const { items, showSection = false, empty = "Nothing here yet." } = Astro.props;
+const years = groupByYear(items, (item) => item.date);
+---
+
+{items.length === 0 && <p class="empty">{empty}</p>}
+{
+	years.map(([year, rows]) => (
+		<section>
+			<h2 class="year" id={`y${year}`}>{year}</h2>
+			<ul class="rows">
+				{rows.map((item) => (
+					<Row item={item} showSection={showSection} />
+				))}
+			</ul>
+		</section>
+	))
+}

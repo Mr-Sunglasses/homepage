@@ -1,0 +1,40 @@
+---
+import { site } from "@/config";
+import { tagSlug } from "@/lib/content";
+
+// Closes every post, note and link: where to reply, and its tags.
+interface Props {
+	fediverse?: string;
+	tags?: string[];
+}
+
+const { fediverse, tags = [] } = Astro.props;
+---
+
+<footer class="entry-end">
+	<p>
+		{
+			fediverse ? (
+				<a href={fediverse}>Reply on Fosstodon →</a>
+			) : (
+				<>
+					Reply on Fosstodon: <a href={site.fediverse.url}>{site.fediverse.handle}</a>
+				</>
+			)
+		}
+	</p>
+	{
+		tags.length > 0 && (
+			<p>
+				Tagged{" "}
+				{tags.map((tag, i) => (
+					<>
+						{i > 0 && " · "}
+						<a href={`/tags/${tagSlug(tag)}/`}>{tag}</a>
+					</>
+				))}
+			</p>
+		)
+	}
+	<slot />
+</footer>
