@@ -6,12 +6,10 @@ import { tilPages } from "@/lib/tils";
 
 // Pages 2 and on; page 1 is /tils/.
 export const getStaticPaths = (async () =>
-	(await tilPages())
-		.slice(1)
-		.map((props) => ({
-			params: { page: String(props.page.currentPage) },
-			props,
-		}))) satisfies GetStaticPaths;
+	(await tilPages()).slice(1).map((props) => ({
+		params: { page: String(props.page.currentPage) },
+		props,
+	}))) satisfies GetStaticPaths;
 
 const props = Astro.props;
 ---
