@@ -8,11 +8,13 @@ import {
 	getNotes,
 	getPages,
 	getPosts,
+	getTils,
 	getTrips,
 	isoDate,
 	linkItem,
 	noteItem,
 	postItem,
+	tilItem,
 	tripItem,
 } from "@/lib/content";
 
@@ -20,12 +22,13 @@ import {
 // length however much is published. Full lists are on the section pages.
 const LATEST = 5;
 const LATEST_SHORT = 3;
-const [posts, notes, links, pages, trips] = await Promise.all([
+const [posts, notes, links, pages, trips, tils] = await Promise.all([
 	getPosts(),
 	getNotes(),
 	getLinks(),
 	getPages(),
 	getTrips(),
+	getTils(),
 ]);
 const now = pages.find((page) => page.id === "now");
 const Now = now ? (await render(now)).Content : null;
@@ -77,6 +80,14 @@ const Now = now ? (await render(now)).Content : null;
 			.slice(0, LATEST_SHORT)
 			.map(postItem)}
 		empty="No poems yet."
+	/>
+
+	<Section
+		title="TILs"
+		href="/tils/"
+		more="all TILs"
+		items={tils.slice(0, LATEST).map(tilItem)}
+		empty="No TILs yet."
 	/>
 
 	<Section

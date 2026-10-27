@@ -1,0 +1,37 @@
+---
+import type { GetStaticPaths } from "astro";
+import Pager from "@/components/Pager.astro";
+import YearList from "@/components/YearList.astro";
+import Base from "@/layouts/Base.astro";
+import { getTils, PAGE_SIZE, type Til, tagSlug, tilItem } from "@/lib/content";
+import { topicsOf } from "@/lib/tils";
+
+// /tils/topics/<topic>/ (tils.kanishkk.xyz/category/<topic> redirects here).
+export const getStaticPaths = (async ({ paginate }) => {
+	const tils = await getTils();
+	return topicsOf(tils).flatMap((topic) =>
+		paginate(
+			tils.filter((til) =>
+				til.data.tags.some((tag) => tagSlug(tag) === topic.slug),
+			),
+			{
+				params: { topic: topic.slug },
+				props: { name: topic.name },
+				pageSize: PAGE_SIZE,
+			},
+		),
+	);
+}) satisfies GetStaticPaths;
+
+const { page, name } = Astro.props;
+---
+
+<Base title={`TILs about ${name}`} crumbs={[{ label: "TILs", href: "/tils/" }, { label: name }]}>
+	<h1>TILs about {name}</h1>
+	<p class="filters">
+		{page.total} {page.total === 1 ? "TIL" : "TILs"} · <a href="/tils/">all topics</a> ·{" "}
+		<a href={`/tags/${tagSlug(name)}/`}>everything tagged {name}</a>
+	</p>
+	<YearList items={(page.data as Til[]).map(tilItem)} />
+	<Pager page={page} />
+</Base>

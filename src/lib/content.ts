@@ -1,11 +1,12 @@
 import { type CollectionEntry, getCollection } from "astro:content";
 
-type Published = "posts" | "notes" | "links" | "pages" | "trips";
+type Published = "posts" | "notes" | "links" | "tils" | "pages" | "trips";
 
 const draftCollection: Record<Published, string> = {
 	posts: "postDrafts",
 	notes: "noteDrafts",
 	links: "linkDrafts",
+	tils: "tilDrafts",
 	pages: "pageDrafts",
 	trips: "tripDrafts",
 };
@@ -16,6 +17,7 @@ export type Entry<C extends Published> = CollectionEntry<C> & {
 export type Post = Entry<"posts">;
 export type Note = Entry<"notes">;
 export type Link = Entry<"links">;
+export type Til = Entry<"tils">;
 export type Page = Entry<"pages">;
 export type Trip = Entry<"trips">;
 export type Photo = Trip["data"]["photos"][number];
@@ -39,6 +41,7 @@ const newestFirst = <T extends { data: { date: Date } }>(a: T, b: T) =>
 export const getPosts = async () => (await load("posts")).sort(newestFirst);
 export const getNotes = async () => (await load("notes")).sort(newestFirst);
 export const getLinks = async () => (await load("links")).sort(newestFirst);
+export const getTils = async () => (await load("tils")).sort(newestFirst);
 export const getPages = () => load("pages");
 export const getTrips = async () =>
 	(await load("trips")).sort(
@@ -61,6 +64,9 @@ export const noteSlug = (note: Note) => note.id.split("/").pop() as string;
 export const noteUrl = (note: Note) => `/notes/${noteSlug(note)}/`;
 export const linkAnchor = (link: Link) => link.id.split("/").pop() as string;
 export const linkUrl = (link: Link) => `/links/#${linkAnchor(link)}`;
+// Same slugs as on tils.kanishkk.xyz/post/<slug>, so old links redirect 1:1.
+export const tilUrl = (til: Til) => `/tils/${til.id}/`;
+export const tilTopicUrl = (tag: string) => `/tils/topics/${tagSlug(tag)}/`;
 // Trips are stored as trips/<slug>/index.md.
 export const tripSlug = (trip: Trip) => trip.id.replace(/\/index$/, "");
 export const tripUrl = (trip: Trip) => `/travel/${tripSlug(trip)}/`;
@@ -140,7 +146,7 @@ export type Item = {
 	title: string;
 	href: string;
 	// What kind of thing it is, shown on mixed lists (archive, tags).
-	label: Kind | "note" | "link" | "trip";
+	label: Kind | "note" | "link" | "til" | "trip";
 	detail?: string;
 	tags: string[];
 	isDraft: boolean;
@@ -178,6 +184,15 @@ export const linkItem = (link: Link): Item => ({
 	external: true,
 });
 
+export const tilItem = (til: Til): Item => ({
+	date: til.data.date,
+	title: til.data.title,
+	href: tilUrl(til),
+	label: "til",
+	tags: til.data.tags,
+	isDraft: til.isDraft,
+});
+
 export const tripItem = (trip: Trip): Item => ({
 	date: trip.data.start,
 	title: trip.data.title,
@@ -196,16 +211,18 @@ export const tripItem = (trip: Trip): Item => ({
 });
 
 export async function getAllItems() {
-	const [posts, notes, links, trips] = await Promise.all([
+	const [posts, notes, links, tils, trips] = await Promise.all([
 		getPosts(),
 		getNotes(),
 		getLinks(),
+		getTils(),
 		getTrips(),
 	]);
 	return [
 		...posts.map(postItem),
 		...notes.map(noteItem),
 		...links.map(linkItem),
+		...tils.map(tilItem),
 		...trips.map(tripItem),
 	].sort((a, b) => b.date.valueOf() - a.date.valueOf());
 }

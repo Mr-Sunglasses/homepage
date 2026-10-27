@@ -11,7 +11,9 @@ import {
 	noteUrl,
 	type Post,
 	postUrl,
+	type Til,
 	type Trip,
+	tilUrl,
 	tripDates,
 	tripPlaces,
 	tripUrl,
@@ -22,7 +24,7 @@ let container: AstroContainer | undefined;
 
 // The entry's HTML exactly as the site renders it, with absolute URLs so
 // images and links work in feed readers.
-async function html(entry: Post | Note | Link | Trip) {
+async function html(entry: Post | Note | Link | Til | Trip) {
 	container ??= await AstroContainer.create();
 	const { Content } = await render(entry);
 	const out = await container.renderToString(Content);
@@ -71,6 +73,16 @@ export async function noteFeedItem(note: Note): Promise<RSSFeedItem> {
 		link: noteUrl(note),
 		categories: note.data.tags,
 		content: lead + (await html(note)),
+	};
+}
+
+export async function tilFeedItem(til: Til): Promise<RSSFeedItem> {
+	return {
+		title: til.data.title,
+		pubDate: til.data.date,
+		link: tilUrl(til),
+		categories: til.data.tags,
+		content: await html(til),
 	};
 }
 

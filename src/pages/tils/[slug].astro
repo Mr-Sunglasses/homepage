@@ -1,0 +1,55 @@
+---
+import { render } from "astro:content";
+import type { GetStaticPaths } from "astro";
+import EntryEnd from "@/components/EntryEnd.astro";
+import Base from "@/layouts/Base.astro";
+import { getTils, isoDate, tilTopicUrl, tilUrl } from "@/lib/content";
+
+export const getStaticPaths = (async () => {
+	const tils = await getTils();
+	const published = tils.filter((til) => !til.isDraft);
+	return tils.map((til) => {
+		const i = published.indexOf(til);
+		return {
+			params: { slug: til.id },
+			props: {
+				til,
+				newer: i > 0 ? published[i - 1] : undefined,
+				older: i >= 0 ? published[i + 1] : undefined,
+			},
+		};
+	});
+}) satisfies GetStaticPaths;
+
+const { til, newer, older } = Astro.props;
+const { Content } = await render(til);
+const { title, date, tags, fediverse } = til.data;
+---
+
+<Base title={title} type="article" isDraft={til.isDraft} crumbs={[{ label: "TILs", href: "/tils/" }, { label: title }]}>
+	<article>
+		<h1>{title}</h1>
+		<p class="entry-meta">
+			<time datetime={isoDate(date)}>{isoDate(date)}</time>
+			{
+				tags.map((tag) => (
+					<>
+						{" · "}
+						<a href={tilTopicUrl(tag)}>{tag}</a>
+					</>
+				))
+			}
+		</p>
+		<Content />
+		<EntryEnd fediverse={fediverse}>
+			{
+				(newer || older) && (
+					<nav class="prev-next" aria-label="More TILs">
+						<span>{older && <a href={tilUrl(older)}>← {older.data.title}</a>}</span>
+						<span>{newer && <a href={tilUrl(newer)}>{newer.data.title} →</a>}</span>
+					</nav>
+				)
+			}
+		</EntryEnd>
+	</article>
+</Base>

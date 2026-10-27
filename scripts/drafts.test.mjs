@@ -30,6 +30,13 @@ test("notes and links move to the publish date", () => {
 	);
 });
 
+test("TILs keep their slug when published", () => {
+	assert.equal(
+		publishedPath("drafts/tils/less-is-more.md", "2026-11-02"),
+		"src/content/tils/less-is-more.md",
+	);
+});
+
 test("only files in drafts/ can be published", () => {
 	assert.throws(() => publishedPath("src/content/posts/a.md", "2026-10-28"));
 });

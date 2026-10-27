@@ -1,0 +1,11 @@
+---
+import TilIndex from "@/components/TilIndex.astro";
+import Base from "@/layouts/Base.astro";
+import { tilPages } from "@/lib/tils";
+
+const [first] = await tilPages();
+---
+
+<Base title="TILs" description="Today I Learned: small things I picked up, by topic." crumbs={[{ label: "TILs" }]}>
+	<TilIndex {...first} />
+</Base>

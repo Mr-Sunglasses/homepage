@@ -3,6 +3,7 @@
 //   pnpm new post "Title" [--kind article|poem|thought]
 //   pnpm new note ["Title"] [--link https://…]
 //   pnpm new link https://… "Title"
+//   pnpm new til "Title" [--tags git,bash]
 //   pnpm new page now|uses|…
 //   pnpm new trip "Ladakh" --start 2026-10-02 [--end 2026-10-12] --region india|world
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
@@ -18,6 +19,7 @@ const { values, positionals } = parseArgs({
 		start: { type: "string" },
 		end: { type: "string" },
 		region: { type: "string" },
+		tags: { type: "string" },
 	},
 });
 const [type, ...args] = positionals;
@@ -56,6 +58,19 @@ function draft() {
 			return [
 				`drafts/links/${date.slice(0, 4)}/${date}-${slugify(title)}.md`,
 				`---\ndate: ${date}\nurl: ${url}\ntitle: ${yaml(title)}\ntags: []\n---\n\nWhy it's worth reading.\n`,
+			];
+		}
+		case "til": {
+			const [title] = args;
+			if (!title)
+				throw new Error('usage: pnpm new til "Title" [--tags git,bash]');
+			const tags = (values.tags ?? "")
+				.split(",")
+				.map((tag) => tag.trim())
+				.filter(Boolean);
+			return [
+				`drafts/tils/${slugify(title)}.md`,
+				`---\ntitle: ${yaml(title)}\ndate: ${date}\ntags: [${tags.join(", ")}]\n---\n\n`,
 			];
 		}
 		case "page": {
@@ -97,7 +112,7 @@ function draft() {
 			];
 		}
 		default:
-			throw new Error("usage: pnpm new post|note|link|page|trip …");
+			throw new Error("usage: pnpm new post|note|link|til|page|trip …");
 	}
 }
 

@@ -119,6 +119,23 @@
 		],
 	});
 
+	// TILs keep the slug from their title: /tils/<slug>/.
+	const tils = (folder) => ({
+		folder,
+		path: "{{slug}}",
+		slug: "{{title}}",
+		...uploads,
+		sortable_fields: newestFirst,
+		summary: "{{date | date('YYYY-MM-DD')}} · {{title}}",
+		fields: [
+			{ name: "title", label: "Title", widget: "string" },
+			date,
+			{ ...tags, label: "Topics", hint: "Comma-separated, e.g. git, bash" },
+			fediverse,
+			markdownBody(["raw", "rich_text"]),
+		],
+	});
+
 	// Photos are added by `pnpm photos:import`; here you write the words.
 	// Everything the import computed is read-only.
 	const readonly = (field) => ({ ...field, readonly: true, ...optional });
@@ -219,6 +236,7 @@
 		{ name: "articles", label: "Articles", label_singular: "Article", ...articles("src/content/posts") },
 		{ name: "poems", label: "Poems", label_singular: "Poem", ...poems("src/content/posts/poems") },
 		{ name: "notes", label: "Notes", label_singular: "Note", ...notes("src/content/notes") },
+		{ name: "tils", label: "TILs", label_singular: "TIL", ...tils("src/content/tils") },
 		{ name: "links", label: "Links", label_singular: "Link", ...links("src/content/links") },
 		{ name: "trips", label: "Trips", label_singular: "Trip", ...trips("src/content/trips") },
 		{
@@ -236,6 +254,7 @@
 		{ name: "draft-articles", label: "Drafts: articles", label_singular: "Draft article", ...articles("drafts/posts") },
 		{ name: "draft-poems", label: "Drafts: poems", label_singular: "Draft poem", ...poems("drafts/posts/poems") },
 		{ name: "draft-notes", label: "Drafts: notes", label_singular: "Draft note", ...notes("drafts/notes") },
+		{ name: "draft-tils", label: "Drafts: TILs", label_singular: "Draft TIL", ...tils("drafts/tils") },
 		{ name: "draft-links", label: "Drafts: links", label_singular: "Draft link", ...links("drafts/links") },
 		{ name: "draft-trips", label: "Drafts: trips", label_singular: "Draft trip", ...trips("drafts/trips") },
 		{

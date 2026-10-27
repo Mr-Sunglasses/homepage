@@ -22,6 +22,7 @@ export const nav = [
 	{ label: "Home", href: "/" },
 	{ label: "Writing", href: "/writing/" },
 	{ label: "Notes", href: "/notes/" },
+	{ label: "TILs", href: "/tils/" },
 	{ label: "Links", href: "/links/" },
 	{ label: "Travel", href: "/travel/" },
 	{ label: "Photos", href: "/photos/" },

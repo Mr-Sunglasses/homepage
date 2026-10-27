@@ -1,0 +1,21 @@
+---
+import type { GetStaticPaths } from "astro";
+import TilIndex from "@/components/TilIndex.astro";
+import Base from "@/layouts/Base.astro";
+import { tilPages } from "@/lib/tils";
+
+// Pages 2 and on; page 1 is /tils/.
+export const getStaticPaths = (async () =>
+	(await tilPages())
+		.slice(1)
+		.map((props) => ({
+			params: { page: String(props.page.currentPage) },
+			props,
+		}))) satisfies GetStaticPaths;
+
+const props = Astro.props;
+---
+
+<Base title={`TILs, page ${props.page.currentPage}`} crumbs={[{ label: "TILs", href: "/tils/" }, { label: `Page ${props.page.currentPage}` }]}>
+	<TilIndex {...props} />
+</Base>

@@ -1,0 +1,42 @@
+---
+import type { Page } from "astro";
+import Pager from "@/components/Pager.astro";
+import YearList from "@/components/YearList.astro";
+import { type Til, tilItem, tilTopicUrl } from "@/lib/content";
+import { topicsOf } from "@/lib/tils";
+
+// The TILs front page and its older pages: topics, then the list.
+interface Props {
+	tils: Til[];
+	all: Til[];
+	page: Page<unknown>;
+}
+
+const { tils, all, page } = Astro.props;
+const topics = topicsOf(all);
+---
+
+<h1>TILs</h1>
+{
+	page.currentPage === 1 && (
+		<>
+			<p>
+				A compilation of “Today I Learned” factoids: small things I picked up, written down so I don't
+				forget them. Inspired by William Woodruff's <a href="https://yossarian.net/til/">TILs page</a>.
+			</p>
+			<p class="filters">
+				{all.length} TILs · <a href="/tils/rss.xml">rss</a>
+			</p>
+			<h2 class="year">By topic</h2>
+			<ul class="inline-list topics">
+				{topics.map((topic) => (
+					<li>
+						<a href={tilTopicUrl(topic.name)}>{topic.name}</a> <span class="meta">{topic.count}</span>
+					</li>
+				))}
+			</ul>
+		</>
+	)
+}
+<YearList items={tils.map(tilItem)} empty="No TILs yet." />
+<Pager page={page} />

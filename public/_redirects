@@ -1,6 +1,14 @@
 # The old blog subdomain: same paths on the main domain.
 https://blog.kanishkk.xyz/*  https://kanishkk.xyz/:splat  301!
 
+# The old TILs site (tiller): same slugs under /tils/.
+https://tils.kanishkk.xyz/post/:slug           https://kanishkk.xyz/tils/:slug/          301!
+https://tils.kanishkk.xyz/post/:slug/          https://kanishkk.xyz/tils/:slug/          301!
+https://tils.kanishkk.xyz/category/:topic      https://kanishkk.xyz/tils/topics/:topic/  301!
+https://tils.kanishkk.xyz/category/:topic/     https://kanishkk.xyz/tils/topics/:topic/  301!
+https://tils.kanishkk.xyz/feed.rss             https://kanishkk.xyz/tils/rss.xml         301!
+https://tils.kanishkk.xyz/*                    https://kanishkk.xyz/tils/                301!
+
 # Old blog (Fuwari) pages that moved.
 /2/              /writing/           301
 /3/              /writing/           301

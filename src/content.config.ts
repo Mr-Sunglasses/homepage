@@ -53,6 +53,18 @@ const links = (base: string) =>
 		}),
 	});
 
+// Today I Learned: short, dated, technical. Migrated from tils.kanishkk.xyz.
+const tils = (base: string) =>
+	defineCollection({
+		loader: from(base),
+		schema: z.strictObject({
+			title: z.string(),
+			date: z.coerce.date(),
+			tags: z.array(z.string()).default([]),
+			fediverse: z.url().optional(),
+		}),
+	});
+
 const pages = (base: string) =>
 	defineCollection({
 		loader: from(base),
@@ -114,6 +126,7 @@ export const collections = {
 	posts: posts("./src/content/posts"),
 	notes: notes("./src/content/notes"),
 	links: links("./src/content/links"),
+	tils: tils("./src/content/tils"),
 	pages: pages("./src/content/pages"),
 	trips: trips("./src/content/trips"),
 	...(DEV
@@ -121,6 +134,7 @@ export const collections = {
 				postDrafts: posts("./drafts/posts"),
 				noteDrafts: notes("./drafts/notes"),
 				linkDrafts: links("./drafts/links"),
+				tilDrafts: tils("./drafts/tils"),
 				pageDrafts: pages("./drafts/pages"),
 				tripDrafts: trips("./drafts/trips"),
 			}

@@ -1,6 +1,8 @@
 # kanishkk.xyz
 
-My personal website: writing, notes, links worth reading, and travel photos.
+My personal website: writing, notes, TILs, links worth reading, and travel
+photos. It replaces three sites: blog.kanishkk.xyz, tils.kanishkk.xyz and the
+old terminal homepage.
 Plain HTML, no JavaScript, no tracking. Built with [Astro](https://astro.build).
 
 ## Working on it
@@ -24,6 +26,7 @@ lists them all at `/drafts/`.
 pnpm new post "Title" [--kind article|poem|thought]
 pnpm new note ["Title"] [--link https://…]
 pnpm new link https://… "Title"
+pnpm new til "Title" [--tags git,bash]
 pnpm new page now
 pnpm new trip "Ladakh" --start 2026-10-02 [--end 2026-10-12] --region india|world
 
@@ -97,6 +100,7 @@ and a homepage under 30 KB.
 src/content/posts/   articles, poems/ (URLs: /posts/<slug>/, unchanged from the old blog)
 src/content/notes/   short notes, by year
 src/content/links/   recommended links, by year
+src/content/tils/    Today I Learned (URLs: /tils/<slug>/, same slugs as tils.kanishkk.xyz/post/<slug>)
 src/content/pages/   about, contact, now, uses
 src/content/trips/   one folder per trip: index.md with the story and photo list
 src/plugins/         Markdown plugins (callouts, iframes → links, title headings)
