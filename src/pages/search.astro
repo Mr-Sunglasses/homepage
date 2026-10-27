@@ -1,0 +1,31 @@
+---
+import Base from "@/layouts/Base.astro";
+
+// The one public page with JavaScript: Pagefind searches an index built
+// with the site (`pagefind --site dist`), entirely in the browser.
+// Nothing is sent anywhere. The index only exists after `pnpm build`.
+---
+
+<Base title="Search" description="Search everything on this site." crumbs={[{ label: "Search" }]}>
+	<h1>Search</h1>
+	<div id="search"></div>
+	<noscript>
+		<p>
+			Search runs in your browser and needs JavaScript; nothing you type is sent anywhere. Without it,
+			everything is listed in the <a href="/archive/">archive</a> and under <a href="/tags/">tags</a> and{" "}
+			<a href="/topics/">topics</a>.
+		</p>
+	</noscript>
+	{
+		import.meta.env.DEV && (
+			<p class="empty">The search index is made by <code>pnpm build</code>; try it with <code>pnpm preview</code>.</p>
+		)
+	}
+	<link rel="stylesheet" href="/pagefind/pagefind-ui.css" />
+	<script is:inline src="/pagefind/pagefind-ui.js"></script>
+	<script is:inline>
+		if (window.PagefindUI) {
+			new PagefindUI({ element: "#search", showSubResults: true, showImages: false, autofocus: true });
+		}
+	</script>
+</Base>

@@ -1,0 +1,48 @@
+---
+import { render } from "astro:content";
+import type { GetStaticPaths } from "astro";
+import Backlinks from "@/components/Backlinks.astro";
+import EntryEnd from "@/components/EntryEnd.astro";
+import Base from "@/layouts/Base.astro";
+import { bookUrl, getBooks, isoDate } from "@/lib/content";
+
+export const getStaticPaths = (async () =>
+	(await getBooks()).map((book) => ({
+		params: { slug: book.id },
+		props: { book },
+	}))) satisfies GetStaticPaths;
+
+const { book } = Astro.props;
+const { Content } = await render(book);
+const { title, author, status, started, finished, rating, url, tags } =
+	book.data;
+const statusLabel = {
+	reading: "reading now",
+	read: "read",
+	want: "want to read",
+	abandoned: "stopped reading",
+}[status];
+---
+
+<Base
+	title={`${title} by ${author}`}
+	description={`My notes on ${title} by ${author}.`}
+	type="article"
+	isDraft={book.isDraft}
+	searchable
+	crumbs={[{ label: "About", href: "/about/" }, { label: "Books", href: "/books/" }, { label: title }]}
+>
+	<article>
+		<h1>{title}</h1>
+		<p class="entry-meta">
+			by {author} · {statusLabel}
+			{started && <>{" · "}started {isoDate(started)}</>}
+			{finished && <>{" · "}finished {isoDate(finished)}</>}
+			{rating && <>{" · "}<span aria-label={`${rating} out of 5`}>{"★".repeat(rating)}{"☆".repeat(5 - rating)}</span></>}
+			{url && <>{" · "}<a href={url}>about the book</a></>}
+		</p>
+		{book.body?.trim() ? <Content /> : <p class="empty">No notes yet.</p>}
+		<Backlinks url={bookUrl(book)} />
+		<EntryEnd tags={tags} />
+	</article>
+</Base>

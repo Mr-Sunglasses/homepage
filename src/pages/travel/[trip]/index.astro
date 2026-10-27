@@ -1,6 +1,7 @@
 ---
 import { render } from "astro:content";
 import type { GetStaticPaths } from "astro";
+import Backlinks from "@/components/Backlinks.astro";
 import EntryEnd from "@/components/EntryEnd.astro";
 import Gallery from "@/components/Gallery.astro";
 import Base from "@/layouts/Base.astro";
@@ -49,6 +50,7 @@ const ordered = [...photos].sort(
 	image={og}
 	type="article"
 	isDraft={trip.isDraft}
+	searchable
 	crumbs={[{ label: "Travel", href: "/travel/" }, { label: title }]}
 >
 	<article>
@@ -78,6 +80,7 @@ const ordered = [...photos].sort(
 			)
 		}
 
+		<Backlinks url={tripUrl(trip)} />
 		<EntryEnd fediverse={fediverse} tags={tags}>
 			{
 				(newer || older) && (

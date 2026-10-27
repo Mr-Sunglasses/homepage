@@ -32,9 +32,19 @@ try {
 	if (!existsSync(source)) throw new Error(`${source} does not exist`);
 
 	const date = today();
-	const isPage = source.startsWith("drafts/pages/");
-	// Trips are dated by their `start`, which publishing doesn't change.
-	const isTrip = source.startsWith("drafts/trips/");
+	// Which date publishing sets, by collection. Trips, talks, books,
+	// projects, topics and the rest keep the dates they already have.
+	const collection = source.split("/")[1];
+	const dateFields =
+		{
+			posts: ["date"],
+			notes: ["date"],
+			links: ["date"],
+			tils: ["date"],
+			quotes: ["date"],
+			pages: ["updated"],
+			positions: ["updated", "reviewed"],
+		}[collection] ?? [];
 	let text = readFileSync(source, "utf8");
 	const current = text.match(/^date:\s*(\S+)/m)?.[1];
 	const publishDate = values["keep-date"] && current ? current : date;
@@ -42,8 +52,9 @@ try {
 	const dest = publishedPath(source, publishDate);
 	if (existsSync(dest)) throw new Error(`${dest} already exists`);
 
-	if (isPage) text = setFrontmatter(text, "updated", date);
-	else if (!isTrip) text = setFrontmatter(text, "date", publishDate);
+	for (const field of dateFields) {
+		text = setFrontmatter(text, field, field === "date" ? publishDate : date);
+	}
 
 	// Copy referenced images next to the published file, at the same relative path.
 	const assets = relativeRefs(text).map((ref) => ({

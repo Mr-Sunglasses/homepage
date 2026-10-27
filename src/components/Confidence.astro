@@ -1,0 +1,17 @@
+---
+import { confidenceLabels } from "@/lib/content";
+
+// How sure I am about a piece of writing.
+interface Props {
+	level?: keyof typeof confidenceLabels;
+}
+
+const { level } = Astro.props;
+const hints = {
+	idea: "Thinking out loud; likely to change.",
+	developing: "Considered, still being worked out.",
+	settled: "A view I've held and tested for a while.",
+};
+---
+
+{level && <span class={`confidence confidence-${level}`} title={hints[level]}>{confidenceLabels[level]}</span>}

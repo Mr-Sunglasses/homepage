@@ -1,5 +1,6 @@
 ---
 import { render } from "astro:content";
+import Confidence from "@/components/Confidence.astro";
 import { domainOf, isoDate, type Note, noteUrl } from "@/lib/content";
 
 // One note in full. Notes with `link` lead with the thing being commented on.
@@ -17,6 +18,7 @@ const Heading = headingLevel === 1 ? "h1" : "h2";
 <article class="note" id={note.id.split("/").pop()}>
 	<p class="meta">
 		<a href={noteUrl(note)}><time datetime={isoDate(date)}>{isoDate(date)}</time></a>
+		<Confidence level={note.data.confidence} />
 		{note.isDraft && <span class="draft-mark">draft</span>}
 	</p>
 	{

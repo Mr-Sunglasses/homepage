@@ -24,9 +24,10 @@ export const nav = [
 	{ label: "Notes", href: "/notes/" },
 	{ label: "TILs", href: "/tils/" },
 	{ label: "Links", href: "/links/" },
+	{ label: "Positions", href: "/positions/" },
 	{ label: "Travel", href: "/travel/" },
-	{ label: "Photos", href: "/photos/" },
 	{ label: "About", href: "/about/" },
+	{ label: "Search", href: "/search/" },
 ];
 
 export const elsewhere = [

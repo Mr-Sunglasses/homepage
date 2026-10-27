@@ -11,6 +11,8 @@ interface Props {
 	crumbs?: Crumb[];
 	isDraft?: boolean;
 	type?: "website" | "article";
+	// Include this page in site search (entries, not lists).
+	searchable?: boolean;
 }
 
 const {
@@ -20,6 +22,7 @@ const {
 	crumbs = [],
 	isDraft = false,
 	type = "website",
+	searchable = false,
 } = Astro.props;
 
 const pageTitle = title ? `${title} · ${site.name}` : site.name;
@@ -58,6 +61,7 @@ const current = (href: string) =>
 		<link rel="alternate" type="application/rss+xml" title={`${site.name}: links`} href="/links/rss.xml" />
 		<link rel="alternate" type="application/rss+xml" title={`${site.name}: TILs`} href="/tils/rss.xml" />
 		<link rel="alternate" type="application/rss+xml" title={`${site.name}: travel`} href="/travel/rss.xml" />
+		<link rel="alternate" type="application/rss+xml" title={`${site.name}: positions`} href="/positions/rss.xml" />
 
 		<link rel="icon" href="/favicon/favicon-light-32.png" sizes="32x32" media="(prefers-color-scheme: light)" />
 		<link rel="icon" href="/favicon/favicon-dark-32.png" sizes="32x32" media="(prefers-color-scheme: dark)" />
@@ -67,7 +71,7 @@ const current = (href: string) =>
 	</head>
 	<body>
 		<a class="skip" href="#main">Skip to content</a>
-		<header class="site-header">
+		<header class="site-header" data-pagefind-ignore>
 			<a class="site-name" href="/">{site.name}</a>
 			<nav class="site-nav" aria-label="Sections">
 				<ul>
@@ -86,7 +90,7 @@ const current = (href: string) =>
 
 		{
 			crumbs.length > 0 && (
-				<nav class="crumbs" aria-label="Breadcrumb">
+				<nav class="crumbs" aria-label="Breadcrumb" data-pagefind-ignore>
 					<ol>
 						<li>
 							<a href="/">Home</a>
@@ -99,12 +103,12 @@ const current = (href: string) =>
 			)
 		}
 
-		<main id="main">
+		<main id="main" data-pagefind-body={searchable && !isDraft ? "" : undefined}>
 			{isDraft && <p class="draft-bar">DRAFT: only visible on this machine. Publish with <code>pnpm promote</code>.</p>}
 			<slot />
 		</main>
 
-		<footer class="site-footer">
+		<footer class="site-footer" data-pagefind-ignore>
 			<ul class="inline-list">
 				{elsewhere.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
 			</ul>

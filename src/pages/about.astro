@@ -1,0 +1,122 @@
+---
+import { render } from "astro:content";
+import Base from "@/layouts/Base.astro";
+import {
+	getAvoid,
+	getBooks,
+	getGlossary,
+	getPages,
+	getPositions,
+	getProjects,
+	getQuotes,
+	getTalks,
+	getTopics,
+} from "@/lib/content";
+
+// About: the page itself, then a hub of everything else about me.
+const pages = await getPages();
+const about = pages.find((page) => page.id === "about");
+const Content = about ? (await render(about)).Content : null;
+const [projects, talks, books, quotes, avoid, glossary, topics, positions] =
+	await Promise.all([
+		getProjects(),
+		getTalks(),
+		getBooks(),
+		getQuotes(),
+		getAvoid(),
+		getGlossary(),
+		getTopics(),
+		getPositions(),
+	]);
+const hasPage = (id: string) => pages.some((page) => page.id === id);
+const count = (n: number, one: string, many: string) =>
+	`${n} ${n === 1 ? one : many}`;
+
+// Only sections with something in them.
+const sections = [
+	hasPage("now") && {
+		href: "/now/",
+		label: "Now",
+		detail: "what I'm doing these days",
+	},
+	positions.length > 0 && {
+		href: "/positions/",
+		label: "Positions",
+		detail: count(positions.length, "view", "views"),
+	},
+	topics.length > 0 && {
+		href: "/topics/",
+		label: "Topics",
+		detail: "the themes I write about",
+	},
+	projects.length > 0 && {
+		href: "/projects/",
+		label: "Projects",
+		detail: count(projects.length, "project", "projects"),
+	},
+	talks.length > 0 && {
+		href: "/talks/",
+		label: "Talks",
+		detail: count(talks.length, "talk", "talks"),
+	},
+	books.length > 0 && {
+		href: "/books/",
+		label: "Books",
+		detail: count(books.length, "book", "books"),
+	},
+	quotes.length > 0 && {
+		href: "/quotes/",
+		label: "Quotes",
+		detail: count(quotes.length, "quote", "quotes"),
+	},
+	avoid.length > 0 && {
+		href: "/avoid/",
+		label: "Things I avoid",
+		detail: "and what I use instead",
+	},
+	glossary.length > 0 && {
+		href: "/glossary/",
+		label: "Glossary",
+		detail: count(glossary.length, "term", "terms"),
+	},
+	hasPage("uses") && {
+		href: "/uses/",
+		label: "Uses",
+		detail: "the tools I use",
+	},
+	hasPage("contact") && {
+		href: "/contact/",
+		label: "Contact",
+		detail: "email, Fediverse, GPG key",
+	},
+	{ href: "/resume.pdf", label: "Résumé", detail: "PDF" },
+].filter((s): s is { href: string; label: string; detail: string } =>
+	Boolean(s),
+);
+---
+
+<Base
+	title="About"
+	description={about?.data.description || "Who I am, what I do and what I think."}
+	isDraft={about?.isDraft}
+	searchable
+	crumbs={[{ label: "About" }]}
+>
+	<h1>About</h1>
+	{Content && <Content />}
+	<section class="block">
+		<div class="section-head">
+			<h2>More about me</h2>
+		</div>
+		<ul class="rows hub">
+			{
+				sections.map((s) => (
+					<li class="row">
+						<a href={s.href}>{s.label}</a>
+						<span class="detail">{s.detail}</span>
+					</li>
+				))
+			}
+		</ul>
+	</section>
+</Base>

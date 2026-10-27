@@ -22,6 +22,17 @@
 		hint: "Comma-separated, e.g. selfhosting, linux",
 	};
 	const date = { name: "date", label: "Date", widget: "datetime", type: "date" };
+	const confidence = {
+		name: "confidence",
+		label: "How sure am I?",
+		widget: "select",
+		...optional,
+		options: [
+			{ label: "Early idea", value: "idea" },
+			{ label: "Developing", value: "developing" },
+			{ label: "Settled", value: "settled" },
+		],
+	};
 	const markdownBody = (modes) => ({
 		name: "body",
 		label: "Text",
@@ -44,6 +55,7 @@
 			? { name: "kind", label: "Kind", widget: "select", options: kinds, default: kinds[0].value }
 			: { name: "kind", widget: "hidden", default: kinds[0].value },
 		tags,
+		confidence,
 		{ name: "image", label: "Cover image", widget: "image", ...optional },
 		fediverse,
 		markdownBody(["raw", "rich_text"]),
@@ -96,6 +108,7 @@
 			},
 			{ name: "linkTitle", label: "Link title", widget: "string", ...optional },
 			tags,
+			confidence,
 			fediverse,
 			markdownBody(),
 		],
@@ -135,6 +148,176 @@
 			markdownBody(["raw", "rich_text"]),
 		],
 	});
+
+	const byTitle = (field = "title") => ({
+		fields: [field],
+		default: { field, direction: "ascending" },
+	});
+	const plain = (folder, extra) => ({ folder, path: "{{slug}}", ...uploads, ...extra });
+
+	// Positions are living pages: update `updated` and add a history line
+	// whenever the view changes.
+	const positions = (folder) =>
+		plain(folder, {
+			slug: "{{title}}",
+			sortable_fields: byTitle(),
+			summary: "{{title}} · {{confidence}} · {{updated | date('YYYY-MM-DD')}}",
+			fields: [
+				{ name: "title", label: "Title", widget: "string" },
+				{ name: "summary", label: "My view, in a sentence or two", widget: "text" },
+				{ ...confidence, required: true, default: "developing" },
+				{ name: "updated", label: "Last changed", widget: "datetime", type: "date" },
+				{ name: "reviewed", label: "Last reviewed", widget: "datetime", type: "date", ...optional },
+				{ name: "changeMind", label: "What would change my mind", widget: "text", ...optional },
+				tags,
+				{
+					name: "history",
+					label: "How this view has changed",
+					hint: "Newest first.",
+					widget: "list",
+					...optional,
+					summary: "{{date | date('YYYY-MM-DD')}}: {{change}}",
+					fields: [
+						{ name: "date", label: "Date", widget: "datetime", type: "date" },
+						{ name: "change", label: "What changed and why", widget: "text" },
+					],
+				},
+				fediverse,
+				{ ...markdownBody(["raw", "rich_text"]), label: "Reasoning and sources" },
+			],
+		});
+
+	const topics = (folder) =>
+		plain(folder, {
+			slug: "{{title}}",
+			sortable_fields: byTitle(),
+			summary: "{{title}}",
+			fields: [
+				{ name: "title", label: "Title", widget: "string" },
+				{ name: "summary", label: "One-line introduction", widget: "text" },
+				{ ...tags, required: true, hint: "Everything with any of these tags appears on the topic page." },
+				{ name: "position", label: "Position (its file name)", widget: "string", ...optional },
+				{ name: "order", label: "Order", widget: "number", default: 100, ...optional },
+				{ ...markdownBody(["raw", "rich_text"]), label: "Introduction: start here" },
+			],
+		});
+
+	const projects = (folder) =>
+		plain(folder, {
+			slug: "{{title}}",
+			sortable_fields: byTitle(),
+			summary: "{{title}} · {{status}}",
+			fields: [
+				{ name: "title", label: "Name", widget: "string" },
+				{ name: "summary", label: "What it is, in a sentence", widget: "text" },
+				{ name: "role", label: "My role", widget: "string", ...optional },
+				{
+					name: "status",
+					label: "Status",
+					widget: "select",
+					options: [
+						{ label: "Active", value: "active" },
+						{ label: "Maintained", value: "maintained" },
+						{ label: "Past", value: "past" },
+					],
+				},
+				{ name: "start", label: "Started", widget: "datetime", type: "date" },
+				{ name: "end", label: "Ended", widget: "datetime", type: "date", ...optional },
+				{ name: "url", label: "Website", widget: "string", ...optional },
+				{ name: "repo", label: "Code", widget: "string", ...optional },
+				tags,
+				{ ...markdownBody(["raw", "rich_text"]), label: "The story" },
+			],
+		});
+
+	const talks = (folder) =>
+		plain(folder, {
+			slug: "{{year}}-{{title}}",
+			sortable_fields: newestFirst,
+			summary: "{{date | date('YYYY-MM-DD')}} · {{event}} · {{title}}",
+			fields: [
+				{ name: "title", label: "Title", widget: "string" },
+				{ name: "event", label: "Event", widget: "string" },
+				date,
+				{ name: "place", label: "Place", widget: "string", ...optional },
+				{ name: "url", label: "Event page", widget: "string", ...optional },
+				{ name: "slides", label: "Slides", widget: "string", ...optional },
+				{ name: "video", label: "Video", widget: "string", ...optional },
+				tags,
+				{ ...markdownBody(), label: "About the talk" },
+			],
+		});
+
+	const books = (folder) =>
+		plain(folder, {
+			slug: "{{title}}",
+			sortable_fields: byTitle(),
+			summary: "{{title}} · {{author}} · {{status}}",
+			fields: [
+				{ name: "title", label: "Title", widget: "string" },
+				{ name: "author", label: "Author", widget: "string" },
+				{
+					name: "status",
+					label: "Status",
+					widget: "select",
+					options: [
+						{ label: "Reading now", value: "reading" },
+						{ label: "Read", value: "read" },
+						{ label: "Want to read", value: "want" },
+						{ label: "Stopped reading", value: "abandoned" },
+					],
+				},
+				{ name: "started", label: "Started", widget: "datetime", type: "date", ...optional },
+				{ name: "finished", label: "Finished", widget: "datetime", type: "date", ...optional },
+				{ name: "rating", label: "Rating (1–5)", widget: "number", min: 1, max: 5, ...optional },
+				{ name: "url", label: "Link to the book", widget: "string", ...optional },
+				tags,
+				{ ...markdownBody(), label: "My notes", ...optional },
+			],
+		});
+
+	const quotes = (folder) =>
+		plain(folder, {
+			slug: "{{author}}-{{year}}{{month}}{{day}}",
+			sortable_fields: newestFirst,
+			summary: "{{author}} · {{date | date('YYYY-MM-DD')}}",
+			fields: [
+				{ ...markdownBody(), label: "The quote" },
+				{ name: "author", label: "Who said it", widget: "string" },
+				{ name: "source", label: "Where (book, talk, page)", widget: "string", ...optional },
+				{ name: "url", label: "Source link", widget: "string", ...optional },
+				{ ...date, label: "Added" },
+				tags,
+			],
+		});
+
+	const avoid = (folder) =>
+		plain(folder, {
+			slug: "{{name}}",
+			sortable_fields: byTitle("name"),
+			summary: "{{name}} → {{instead}}",
+			fields: [
+				{ name: "name", label: "What I avoid", widget: "string" },
+				{ name: "instead", label: "What I use instead", widget: "string" },
+				{ name: "category", label: "Category", widget: "string", hint: "e.g. Messaging, Search, Hosting" },
+				{ name: "url", label: "Link to the alternative", widget: "string", ...optional },
+				{ name: "since", label: "Since", widget: "datetime", type: "date", ...optional },
+				{ ...markdownBody(), label: "Why" },
+			],
+		});
+
+	const glossary = (folder) =>
+		plain(folder, {
+			slug: "{{term}}",
+			sortable_fields: byTitle("term"),
+			summary: "{{term}}",
+			fields: [
+				{ name: "term", label: "Term", widget: "string" },
+				{ name: "seeAlso", label: "See also (term file names)", widget: "list", ...optional },
+				tags,
+				{ ...markdownBody(), label: "What I mean by it" },
+			],
+		});
 
 	// Photos are added by `pnpm photos:import`; here you write the words.
 	// Everything the import computed is read-only.
@@ -239,6 +422,14 @@
 		{ name: "tils", label: "TILs", label_singular: "TIL", ...tils("src/content/tils") },
 		{ name: "links", label: "Links", label_singular: "Link", ...links("src/content/links") },
 		{ name: "trips", label: "Trips", label_singular: "Trip", ...trips("src/content/trips") },
+		{ name: "positions", label: "Positions", label_singular: "Position", ...positions("src/content/positions") },
+		{ name: "topics", label: "Topics", label_singular: "Topic", ...topics("src/content/topics") },
+		{ name: "projects", label: "Projects", label_singular: "Project", ...projects("src/content/projects") },
+		{ name: "talks", label: "Talks", label_singular: "Talk", ...talks("src/content/talks") },
+		{ name: "books", label: "Books", label_singular: "Book", ...books("src/content/books") },
+		{ name: "quotes", label: "Quotes", label_singular: "Quote", ...quotes("src/content/quotes") },
+		{ name: "avoid", label: "Things I avoid", label_singular: "Thing I avoid", ...avoid("src/content/avoid") },
+		{ name: "glossary", label: "Glossary", label_singular: "Term", ...glossary("src/content/glossary") },
 		{
 			name: "pages",
 			label: "Pages",
@@ -257,6 +448,14 @@
 		{ name: "draft-tils", label: "Drafts: TILs", label_singular: "Draft TIL", ...tils("drafts/tils") },
 		{ name: "draft-links", label: "Drafts: links", label_singular: "Draft link", ...links("drafts/links") },
 		{ name: "draft-trips", label: "Drafts: trips", label_singular: "Draft trip", ...trips("drafts/trips") },
+		{ name: "draft-positions", label: "Drafts: positions", label_singular: "Draft position", ...positions("drafts/positions") },
+		{ name: "draft-topics", label: "Drafts: topics", label_singular: "Draft topic", ...topics("drafts/topics") },
+		{ name: "draft-projects", label: "Drafts: projects", label_singular: "Draft project", ...projects("drafts/projects") },
+		{ name: "draft-talks", label: "Drafts: talks", label_singular: "Draft talk", ...talks("drafts/talks") },
+		{ name: "draft-books", label: "Drafts: books", label_singular: "Draft book", ...books("drafts/books") },
+		{ name: "draft-quotes", label: "Drafts: quotes", label_singular: "Draft quote", ...quotes("drafts/quotes") },
+		{ name: "draft-avoid", label: "Drafts: things I avoid", label_singular: "Draft", ...avoid("drafts/avoid") },
+		{ name: "draft-glossary", label: "Drafts: glossary", label_singular: "Draft term", ...glossary("drafts/glossary") },
 		{
 			name: "draft-pages",
 			label: "Drafts: pages",

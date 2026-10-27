@@ -1,5 +1,6 @@
 ---
 import type { GetStaticPaths } from "astro";
+import Backlinks from "@/components/Backlinks.astro";
 import EntryEnd from "@/components/EntryEnd.astro";
 import NoteBody from "@/components/NoteBody.astro";
 import Base from "@/layouts/Base.astro";
@@ -9,6 +10,7 @@ import {
 	monthName,
 	noteLabel,
 	noteSlug,
+	noteUrl,
 } from "@/lib/content";
 
 export const getStaticPaths = (async () => {
@@ -29,6 +31,7 @@ const month = isoMonth(note.data.date);
 	description={noteLabel(note, 160)}
 	type="article"
 	isDraft={note.isDraft}
+	searchable
 	crumbs={[
 		{ label: "Notes", href: "/notes/" },
 		{ label: monthName(note.data.date), href: `/notes/${month.replace("-", "/")}/` },
@@ -36,5 +39,6 @@ const month = isoMonth(note.data.date);
 	]}
 >
 	<NoteBody note={note} headingLevel={1} />
+	<Backlinks url={noteUrl(note)} />
 	<EntryEnd fediverse={note.data.fediverse} tags={note.data.tags} />
 </Base>

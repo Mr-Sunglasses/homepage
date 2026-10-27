@@ -1,6 +1,7 @@
 ---
 import { render } from "astro:content";
 import type { GetStaticPaths } from "astro";
+import Backlinks from "@/components/Backlinks.astro";
 import EntryEnd from "@/components/EntryEnd.astro";
 import Base from "@/layouts/Base.astro";
 import { getTils, isoDate, tilTopicUrl, tilUrl } from "@/lib/content";
@@ -26,7 +27,7 @@ const { Content } = await render(til);
 const { title, date, tags, fediverse } = til.data;
 ---
 
-<Base title={title} type="article" isDraft={til.isDraft} crumbs={[{ label: "TILs", href: "/tils/" }, { label: title }]}>
+<Base title={title} type="article" isDraft={til.isDraft} searchable crumbs={[{ label: "TILs", href: "/tils/" }, { label: title }]}>
 	<article>
 		<h1>{title}</h1>
 		<p class="entry-meta">
@@ -41,6 +42,7 @@ const { title, date, tags, fediverse } = til.data;
 			}
 		</p>
 		<Content />
+		<Backlinks url={tilUrl(til)} />
 		<EntryEnd fediverse={fediverse}>
 			{
 				(newer || older) && (

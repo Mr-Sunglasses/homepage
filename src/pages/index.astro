@@ -7,14 +7,18 @@ import {
 	getLinks,
 	getNotes,
 	getPages,
+	getPositions,
 	getPosts,
 	getTils,
+	getTopics,
 	getTrips,
 	isoDate,
 	linkItem,
 	noteItem,
+	positionItem,
 	postItem,
 	tilItem,
+	topicUrl,
 	tripItem,
 } from "@/lib/content";
 
@@ -22,20 +26,36 @@ import {
 // length however much is published. Full lists are on the section pages.
 const LATEST = 5;
 const LATEST_SHORT = 3;
-const [posts, notes, links, pages, trips, tils] = await Promise.all([
-	getPosts(),
-	getNotes(),
-	getLinks(),
-	getPages(),
-	getTrips(),
-	getTils(),
-]);
+const [posts, notes, links, pages, trips, tils, positions, topics] =
+	await Promise.all([
+		getPosts(),
+		getNotes(),
+		getLinks(),
+		getPages(),
+		getTrips(),
+		getTils(),
+		getPositions(),
+		getTopics(),
+	]);
 const now = pages.find((page) => page.id === "now");
 const Now = now ? (await render(now)).Content : null;
 ---
 
 <Base>
 	<p>{site.intro}</p>
+	{
+		topics.length > 0 && (
+			<p class="filters topics-line">
+				Start with a topic:{" "}
+				{topics.map((t, i) => (
+					<>
+						{i > 0 && " · "}
+						<a href={topicUrl(t)}>{t.data.title}</a>
+					</>
+				))}
+			</p>
+		)
+	}
 
 	{
 		now && Now && (
@@ -81,6 +101,18 @@ const Now = now ? (await render(now)).Content : null;
 			.map(postItem)}
 		empty="No poems yet."
 	/>
+
+	{
+		positions.length > 0 && (
+			<Section
+				title="Positions"
+				href="/positions/"
+				more="all positions"
+				items={positions.slice(0, LATEST_SHORT).map(positionItem)}
+				empty=""
+			/>
+		)
+	}
 
 	<Section
 		title="TILs"

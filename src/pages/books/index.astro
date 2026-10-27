@@ -1,0 +1,26 @@
+---
+import BookList from "@/components/BookList.astro";
+import Base from "@/layouts/Base.astro";
+import { type Book, getBooks, groupByYear } from "@/lib/content";
+
+const books = await getBooks();
+const of = (status: Book["data"]["status"]) =>
+	books.filter((b) => b.data.status === status);
+const read = of("read").filter((b) => b.data.finished);
+const undated = of("read").filter((b) => !b.data.finished);
+---
+
+<Base title="Books" description="What I'm reading, what I've read, and my notes on them." crumbs={[{ label: "About", href: "/about/" }, { label: "Books" }]}>
+	<h1>Books</h1>
+	<p>What I'm reading, what I've read, and my notes on them.</p>
+	{books.length === 0 && <p class="empty">No books yet.</p>}
+	{of("reading").length > 0 && <BookList title="Reading now" books={of("reading")} />}
+	{
+		groupByYear(read, (b) => b.data.finished as Date).map(([year, books]) => (
+			<BookList title={`Read in ${year}`} books={books} />
+		))
+	}
+	{undated.length > 0 && <BookList title="Read earlier" books={undated} />}
+	{of("want").length > 0 && <BookList title="Want to read" books={of("want")} />}
+	{of("abandoned").length > 0 && <BookList title="Stopped reading" books={of("abandoned")} />}
+</Base>

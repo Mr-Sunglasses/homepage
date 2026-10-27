@@ -1,0 +1,26 @@
+---
+import Base from "@/layouts/Base.astro";
+import { getTopics, topicUrl } from "@/lib/content";
+
+const topics = await getTopics();
+---
+
+<Base title="Topics" description="Start here: the themes I write about, each with an introduction." crumbs={[{ label: "Topics" }]}>
+	<h1>Topics</h1>
+	<p>The themes I keep coming back to. Each one starts with a short introduction, then everything I've written, collected and learned about it.</p>
+	{topics.length === 0 && <p class="empty">No topics yet.</p>}
+	<ul class="blocks">
+		{
+			topics.map((t) => (
+				<li>
+					<a class="block-title" href={topicUrl(t)}>
+						{t.data.title}
+					</a>
+					{t.isDraft && <span class="draft-mark">draft</span>}
+					<p>{t.data.summary}</p>
+				</li>
+			))
+		}
+	</ul>
+	<p class="meta">Looking for one exact tag? See <a href="/tags/">all tags</a>.</p>
+</Base>

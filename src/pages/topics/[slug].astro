@@ -1,0 +1,108 @@
+---
+import { render } from "astro:content";
+import type { GetStaticPaths } from "astro";
+import Backlinks from "@/components/Backlinks.astro";
+import Confidence from "@/components/Confidence.astro";
+import Section from "@/components/Section.astro";
+import Base from "@/layouts/Base.astro";
+import {
+	getAllItems,
+	getPositions,
+	getTopics,
+	type Item,
+	positionUrl,
+	tagSlug,
+	topicUrl,
+} from "@/lib/content";
+
+// A topic hub: the introduction, the position, then everything with any of
+// the topic's tags, by kind. Each block is short; "all" goes to the tag page.
+export const getStaticPaths = (async () => {
+	const [topics, positions, items] = await Promise.all([
+		getTopics(),
+		getPositions(),
+		getAllItems(),
+	]);
+	return topics.map((topic) => {
+		const slugs = new Set(topic.data.tags.map(tagSlug));
+		return {
+			params: { slug: topic.id },
+			props: {
+				topic,
+				position: positions.find((p) => p.id === topic.data.position),
+				items: items.filter((item) =>
+					item.tags.some((tag) => slugs.has(tagSlug(tag))),
+				),
+			},
+		};
+	});
+}) satisfies GetStaticPaths;
+
+const { topic, position, items } = Astro.props;
+const { Content } = await render(topic);
+const PER_GROUP = 8;
+const groups: { title: string; labels: Item["label"][] }[] = [
+	{ title: "Writing", labels: ["article", "thought", "poem"] },
+	{ title: "Positions", labels: ["position"] },
+	{ title: "Notes", labels: ["note"] },
+	{ title: "TILs", labels: ["til"] },
+	{ title: "Links", labels: ["link"] },
+	{ title: "Projects", labels: ["project"] },
+	{ title: "Talks", labels: ["talk"] },
+	{ title: "Books", labels: ["book"] },
+	{ title: "Travel", labels: ["trip"] },
+];
+const firstTag = `/tags/${tagSlug(topic.data.tags[0])}/`;
+---
+
+<Base
+	title={topic.data.title}
+	description={topic.data.summary}
+	isDraft={topic.isDraft}
+	searchable
+	crumbs={[{ label: "Topics", href: "/topics/" }, { label: topic.data.title }]}
+>
+	<h1>{topic.data.title}</h1>
+	<p class="lead">{topic.data.summary}</p>
+	<Content />
+
+	{
+		position && (
+			<aside class="callout position-summary">
+				<p class="callout-title">
+					My position: <a href={positionUrl(position)}>{position.data.title}</a>{" "}
+					<Confidence level={position.data.confidence} />
+				</p>
+				<p>{position.data.summary}</p>
+			</aside>
+		)
+	}
+
+	{
+		groups.map(({ title, labels }) => {
+			const rows = items.filter(
+				(item) => labels.includes(item.label) && item.href !== (position && positionUrl(position)),
+			);
+			return (
+				rows.length > 0 && (
+					<Section
+						title={title}
+						href={firstTag}
+						more={rows.length > PER_GROUP ? `all ${rows.length}` : "by tag"}
+						items={rows.slice(0, PER_GROUP)}
+						empty=""
+					/>
+				)
+			);
+		})
+	}
+	<p class="meta">
+		Tags in this topic: {topic.data.tags.map((tag, i) => (
+			<>
+				{i > 0 && " · "}
+				<a href={`/tags/${tagSlug(tag)}/`}>{tag}</a>
+			</>
+		))}
+	</p>
+	<Backlinks url={topicUrl(topic)} />
+</Base>

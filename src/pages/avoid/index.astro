@@ -1,0 +1,43 @@
+---
+import { render } from "astro:content";
+import Base from "@/layouts/Base.astro";
+import { getAvoid, isoDate } from "@/lib/content";
+
+const entries = await Promise.all(
+	(await getAvoid()).map(async (entry) => ({
+		entry,
+		Content: (await render(entry)).Content,
+	})),
+);
+const categories = new Map<string, typeof entries>();
+for (const item of entries) {
+	const key = item.entry.data.category;
+	categories.set(key, [...(categories.get(key) ?? []), item]);
+}
+---
+
+<Base title="Things I avoid" description="Software and services I don't use, why, and what I use instead." crumbs={[{ label: "About", href: "/about/" }, { label: "Things I avoid" }]}>
+	<h1>Things I avoid</h1>
+	<p>Software and services I don't use, why, and what I use instead. If one of these bothers you too, the alternative is right next to it.</p>
+	{entries.length === 0 && <p class="empty">Nothing listed yet.</p>}
+	{
+		[...categories.entries()]
+			.sort(([a], [b]) => a.localeCompare(b))
+			.map(([category, items]) => (
+				<section>
+					<h2 class="year">{category}</h2>
+					{items.map(({ entry, Content }) => (
+						<article class="link avoid" id={entry.id}>
+							<h3>
+								<span class="avoid-name">{entry.data.name}</span> →{" "}
+								{entry.data.url ? <a href={entry.data.url}>{entry.data.instead}</a> : entry.data.instead}
+								{entry.isDraft && <span class="draft-mark">draft</span>}
+							</h3>
+							<Content />
+							{entry.data.since && <p class="meta">since {isoDate(entry.data.since)}</p>}
+						</article>
+					))}
+				</section>
+			))
+	}
+</Base>

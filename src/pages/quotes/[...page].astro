@@ -1,0 +1,57 @@
+---
+import { render } from "astro:content";
+import type { GetStaticPaths } from "astro";
+import Pager from "@/components/Pager.astro";
+import Base from "@/layouts/Base.astro";
+import { getQuotes, type Quote, tagSlug } from "@/lib/content";
+
+// /quotes/, /quotes/2/, … newest first. Each quote has an anchor to link to.
+export const getStaticPaths = (async ({ paginate }) =>
+	paginate(await getQuotes(), { pageSize: 30 })) satisfies GetStaticPaths;
+
+const { page } = Astro.props;
+const quotes = await Promise.all(
+	(page.data as Quote[]).map(async (quote) => ({
+		quote,
+		Content: (await render(quote)).Content,
+	})),
+);
+---
+
+<Base
+	title={page.currentPage > 1 ? `Quotes, page ${page.currentPage}` : "Quotes"}
+	description="Words worth keeping, with where they came from."
+	crumbs={[{ label: "About", href: "/about/" }, { label: "Quotes" }]}
+>
+	<h1>Quotes</h1>
+	<p>Words worth keeping, with where they came from.</p>
+	{page.total === 0 && <p class="empty">No quotes yet.</p>}
+	{
+		quotes.map(({ quote, Content }) => (
+			<figure class="quote" id={quote.id}>
+				<blockquote>
+					<Content />
+				</blockquote>
+				<figcaption class="meta">
+					— {quote.data.author}
+					{quote.data.source && (
+						<>
+							{", "}
+							{quote.data.url ? <a href={quote.data.url}>{quote.data.source}</a> : quote.data.source}
+						</>
+					)}
+					{" · "}
+					<a href={`#${quote.id}`}>link</a>
+					{quote.data.tags.map((tag) => (
+						<>
+							{" · "}
+							<a href={`/tags/${tagSlug(tag)}/`}>{tag}</a>
+						</>
+					))}
+					{quote.isDraft && <span class="draft-mark">draft</span>}
+				</figcaption>
+			</figure>
+		))
+	}
+	<Pager page={page} />
+</Base>

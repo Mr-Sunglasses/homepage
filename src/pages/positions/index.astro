@@ -1,0 +1,37 @@
+---
+import Confidence from "@/components/Confidence.astro";
+import Base from "@/layouts/Base.astro";
+import { getPositions, isoDate, positionUrl } from "@/lib/content";
+
+const positions = (await getPositions()).sort((a, b) =>
+	a.data.title.localeCompare(b.data.title),
+);
+---
+
+<Base title="Positions" description="What I believe, and why: kept up to date, with a history of how each view changed." crumbs={[{ label: "Positions" }]}>
+	<h1>Positions</h1>
+	<p>
+		What I believe, and why. Unlike a dated post, each of these is a living page: it says how sure I am,
+		when I last reviewed it, what would change my mind, and how the view has changed over time.
+	</p>
+	<p class="filters">
+		{positions.length} {positions.length === 1 ? "position" : "positions"} · <a href="/topics/">topics</a> ·{" "}
+		<a href="/positions/rss.xml">rss (new and changed views)</a>
+	</p>
+	{positions.length === 0 && <p class="empty">No positions written down yet.</p>}
+	<ul class="blocks">
+		{
+			positions.map((p) => (
+				<li>
+					<a class="block-title" href={positionUrl(p)}>
+						{p.data.title}
+					</a>
+					<Confidence level={p.data.confidence} />
+					{p.isDraft && <span class="draft-mark">draft</span>}
+					<p>{p.data.summary}</p>
+					<p class="meta">updated {isoDate(p.data.updated)}</p>
+				</li>
+			))
+		}
+	</ul>
+</Base>

@@ -1,0 +1,103 @@
+---
+import { render } from "astro:content";
+import type { GetStaticPaths } from "astro";
+import Backlinks from "@/components/Backlinks.astro";
+import Confidence from "@/components/Confidence.astro";
+import EntryEnd from "@/components/EntryEnd.astro";
+import Base from "@/layouts/Base.astro";
+import {
+	getPositions,
+	getTopics,
+	isoDate,
+	positionUrl,
+	topicUrl,
+} from "@/lib/content";
+
+export const getStaticPaths = (async () => {
+	const [positions, topics] = await Promise.all([getPositions(), getTopics()]);
+	return positions.map((position) => ({
+		params: { slug: position.id },
+		props: {
+			position,
+			topics: topics.filter((t) => t.data.position === position.id),
+		},
+	}));
+}) satisfies GetStaticPaths;
+
+const { position, topics } = Astro.props;
+const { Content } = await render(position);
+const {
+	title,
+	summary,
+	confidence,
+	updated,
+	reviewed,
+	changeMind,
+	history,
+	tags,
+	fediverse,
+} = position.data;
+---
+
+<Base
+	title={title}
+	description={summary}
+	type="article"
+	isDraft={position.isDraft}
+	searchable
+	crumbs={[{ label: "Positions", href: "/positions/" }, { label: title }]}
+>
+	<article>
+		<h1>{title}</h1>
+		<p class="entry-meta">
+			<Confidence level={confidence} />
+			{" · "}updated{" "}
+			<time id={`updated-${isoDate(updated)}`} datetime={isoDate(updated)}>
+				{isoDate(updated)}
+			</time>
+			{reviewed && <>{" · "}reviewed <time datetime={isoDate(reviewed)}>{isoDate(reviewed)}</time></>}
+		</p>
+		<aside class="callout position-summary">
+			<p class="callout-title">My view</p>
+			<p>{summary}</p>
+		</aside>
+		<Content />
+		{
+			changeMind && (
+				<section>
+					<h2>What would change my mind</h2>
+					<p>{changeMind}</p>
+				</section>
+			)
+		}
+		{
+			history.length > 0 && (
+				<section>
+					<h2>How this view has changed</h2>
+					<ul class="rows">
+						{history.map((h) => (
+							<li class="row">
+								<time datetime={isoDate(h.date)}>{isoDate(h.date)}</time>
+								<span>{h.change}</span>
+							</li>
+						))}
+					</ul>
+				</section>
+			)
+		}
+		{
+			topics.length > 0 && (
+				<p class="meta">
+					Part of {topics.map((t, i) => (
+						<>
+							{i > 0 && ", "}
+							<a href={topicUrl(t)}>{t.data.title}</a>
+						</>
+					))}
+				</p>
+			)
+		}
+		<Backlinks url={positionUrl(position)} />
+		<EntryEnd fediverse={fediverse} tags={tags} />
+	</article>
+</Base>

@@ -1,0 +1,49 @@
+---
+import { render } from "astro:content";
+import Base from "@/layouts/Base.astro";
+import { getTalks, groupByYear, isoDate, tagSlug } from "@/lib/content";
+
+const talks = await Promise.all(
+	(await getTalks()).map(async (talk) => ({
+		talk,
+		Content: (await render(talk)).Content,
+	})),
+);
+const years = groupByYear(talks, ({ talk }) => talk.data.date);
+---
+
+<Base title="Talks" description="Talks I've given at conferences and meetups." crumbs={[{ label: "About", href: "/about/" }, { label: "Talks" }]}>
+	<h1>Talks</h1>
+	<p>Talks I've given at conferences and meetups, with slides and recordings where they exist.</p>
+	{talks.length === 0 && <p class="empty">No talks listed yet.</p>}
+	{
+		years.map(([year, entries]) => (
+			<section>
+				<h2 class="year">{year}</h2>
+				{entries.map(({ talk, Content }) => (
+					<article class="link" id={talk.id}>
+						<h3>{talk.data.title}</h3>
+						<p class="meta">
+							<a href={`#${talk.id}`}>
+								<time datetime={isoDate(talk.data.date)}>{isoDate(talk.data.date)}</time>
+							</a>
+							{" · "}
+							{talk.data.url ? <a href={talk.data.url}>{talk.data.event}</a> : talk.data.event}
+							{talk.data.place && <>{" · "}{talk.data.place}</>}
+							{talk.data.slides && <>{" · "}<a href={talk.data.slides}>slides</a></>}
+							{talk.data.video && <>{" · "}<a href={talk.data.video}>video</a></>}
+							{talk.data.tags.map((tag) => (
+								<>
+									{" · "}
+									<a href={`/tags/${tagSlug(tag)}/`}>{tag}</a>
+								</>
+							))}
+							{talk.isDraft && <span class="draft-mark">draft</span>}
+						</p>
+						<Content />
+					</article>
+				))}
+			</section>
+		))
+	}
+</Base>

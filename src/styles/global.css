@@ -568,3 +568,127 @@ td {
 .map figcaption {
 	margin-top: 0.25rem;
 }
+
+/* Lists of blocks: positions, topics, projects */
+.blocks {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	gap: 1.1rem;
+}
+.blocks p {
+	margin: 0.2rem 0 0;
+}
+.block-title {
+	font-family: var(--sans);
+	font-weight: 700;
+	margin-right: 0.5rem;
+}
+.hub .row {
+	grid-template-columns: 9rem minmax(0, 1fr);
+}
+.topics-line a {
+	font-weight: 600;
+}
+
+/* How sure I am */
+.confidence {
+	display: inline-block;
+	font-family: var(--sans);
+	font-size: 0.7rem;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	padding: 0 0.45em;
+	border: 1px solid currentColor;
+	border-radius: 3px;
+	margin-left: 0.5em;
+	vertical-align: 0.1em;
+	color: var(--muted);
+}
+.confidence-idea {
+	color: var(--warn);
+}
+.confidence-settled {
+	color: var(--tip);
+}
+.position-summary p:last-child {
+	font-size: 1.1rem;
+}
+
+/* Links between pages */
+a.wiki {
+	text-decoration-style: dotted;
+}
+.wiki-missing {
+	color: var(--draft);
+}
+.backlinks {
+	margin-top: 2.5rem;
+	padding: 0.75rem 1rem;
+	background: var(--soft);
+	border-radius: 4px;
+}
+.backlinks h2 {
+	font-size: 0.95rem;
+	margin: 0 0 0.4rem;
+}
+.backlinks ul {
+	margin: 0;
+	padding-left: 1.1rem;
+}
+
+/* Quotes */
+.quote {
+	margin: 1.75rem 0;
+}
+.quote blockquote {
+	margin: 0 0 0.4rem;
+	font-size: 1.1rem;
+	color: var(--fg);
+}
+.quote blockquote p {
+	margin: 0.3rem 0;
+}
+
+/* Things I avoid */
+.avoid-name {
+	text-decoration: line-through;
+	text-decoration-thickness: 2px;
+	color: var(--muted);
+}
+
+/* Glossary */
+.glossary dt {
+	font-family: var(--sans);
+	font-weight: 700;
+	margin-top: 1rem;
+}
+.glossary dt a,
+.glossary dt a:visited {
+	color: var(--fg);
+	text-decoration: none;
+}
+.glossary dd {
+	margin: 0.2rem 0 0 1rem;
+}
+.glossary dd p {
+	margin: 0.2rem 0;
+}
+
+.stars {
+	letter-spacing: 0.1em;
+}
+
+/* Search (Pagefind UI) in the site's colours */
+#search {
+	--pagefind-ui-scale: 0.9;
+	--pagefind-ui-primary: var(--link);
+	--pagefind-ui-text: var(--fg);
+	--pagefind-ui-background: var(--bg);
+	--pagefind-ui-border: var(--line);
+	--pagefind-ui-tag: var(--soft);
+	--pagefind-ui-font: var(--sans);
+	--pagefind-ui-border-radius: 4px;
+}

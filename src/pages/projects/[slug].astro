@@ -1,0 +1,46 @@
+---
+import { render } from "astro:content";
+import type { GetStaticPaths } from "astro";
+import Backlinks from "@/components/Backlinks.astro";
+import EntryEnd from "@/components/EntryEnd.astro";
+import Base from "@/layouts/Base.astro";
+import { getProjects, isoMonth, projectUrl } from "@/lib/content";
+
+export const getStaticPaths = (async () =>
+	(await getProjects()).map((project) => ({
+		params: { slug: project.id },
+		props: { project },
+	}))) satisfies GetStaticPaths;
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+const { title, summary, role, status, start, end, url, repo, tags } =
+	project.data;
+const statusLabel = {
+	active: "active",
+	maintained: "maintained",
+	past: "finished",
+}[status];
+---
+
+<Base
+	title={title}
+	description={summary}
+	type="article"
+	isDraft={project.isDraft}
+	searchable
+	crumbs={[{ label: "About", href: "/about/" }, { label: "Projects", href: "/projects/" }, { label: title }]}
+>
+	<article>
+		<h1>{title}</h1>
+		<p class="entry-meta">
+			{[statusLabel, role, `since ${isoMonth(start)}`, end && `until ${isoMonth(end)}`].filter(Boolean).join(" · ")}
+			{repo && <>{" · "}<a href={repo}>code</a></>}
+			{url && <>{" · "}<a href={url}>website</a></>}
+		</p>
+		<p class="lead">{summary}</p>
+		<Content />
+		<Backlinks url={projectUrl(project)} />
+		<EntryEnd tags={tags} />
+	</article>
+</Base>

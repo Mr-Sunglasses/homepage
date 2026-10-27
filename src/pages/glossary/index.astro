@@ -1,0 +1,55 @@
+---
+import { render } from "astro:content";
+import Base from "@/layouts/Base.astro";
+import { getGlossary } from "@/lib/content";
+
+const terms = await Promise.all(
+	(await getGlossary()).map(async (term) => ({
+		term,
+		Content: (await render(term)).Content,
+	})),
+);
+const byId = new Map(terms.map(({ term }) => [term.id, term]));
+const letters = new Map<string, typeof terms>();
+for (const item of terms) {
+	const letter = item.term.data.term[0].toUpperCase();
+	letters.set(letter, [...(letters.get(letter) ?? []), item]);
+}
+---
+
+<Base title="Glossary" description="Words I use on purpose, and what I mean by them." crumbs={[{ label: "About", href: "/about/" }, { label: "Glossary" }]}>
+	<h1>Glossary</h1>
+	<p>Words I use on purpose, and what I mean by them. Link to a term with <code>[[glossary/term]]</code>.</p>
+	{terms.length === 0 && <p class="empty">No terms yet.</p>}
+	{
+		[...letters.entries()].map(([letter, items]) => (
+			<section>
+				<h2 class="year">{letter}</h2>
+				<dl class="glossary">
+					{items.map(({ term, Content }) => (
+						<>
+							<dt id={term.id}>
+								<a href={`#${term.id}`}>{term.data.term}</a>
+								{term.isDraft && <span class="draft-mark">draft</span>}
+							</dt>
+							<dd>
+								<Content />
+								{term.data.seeAlso.length > 0 && (
+									<p class="meta">
+										See also:{" "}
+										{term.data.seeAlso.map((id, i) => (
+											<>
+												{i > 0 && ", "}
+												<a href={`#${id}`}>{byId.get(id)?.data.term ?? id}</a>
+											</>
+										))}
+									</p>
+								)}
+							</dd>
+						</>
+					))}
+				</dl>
+			</section>
+		))
+	}
+</Base>

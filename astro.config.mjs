@@ -4,6 +4,8 @@ import remarkDirective from "remark-directive";
 import { rehypeEmbedsToLinks } from "./src/plugins/rehype-embeds-to-links.mjs";
 import { remarkDropTitleHeading } from "./src/plugins/remark-drop-title-heading.mjs";
 import { remarkPlainDirectives } from "./src/plugins/remark-plain-directives.mjs";
+import { remarkWikiLinks } from "./src/plugins/remark-wiki-links.mjs";
+import { wikiLinkCheck } from "./src/plugins/wiki-link-check.mjs";
 
 // https://astro.build/config
 export default defineConfig({
@@ -17,6 +19,7 @@ export default defineConfig({
 		assets: "assets",
 	},
 	integrations: [
+		wikiLinkCheck(),
 		sitemap({
 			filter: (page) => !page.includes("/drafts/"),
 		}),
@@ -26,6 +29,7 @@ export default defineConfig({
 			remarkDirective,
 			remarkPlainDirectives,
 			remarkDropTitleHeading,
+			remarkWikiLinks,
 		],
 		rehypePlugins: [rehypeEmbedsToLinks],
 		shikiConfig: {

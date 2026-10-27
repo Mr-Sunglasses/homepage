@@ -1,6 +1,20 @@
 import { type CollectionEntry, getCollection } from "astro:content";
 
-type Published = "posts" | "notes" | "links" | "tils" | "pages" | "trips";
+type Published =
+	| "posts"
+	| "notes"
+	| "links"
+	| "tils"
+	| "pages"
+	| "trips"
+	| "positions"
+	| "topics"
+	| "projects"
+	| "talks"
+	| "books"
+	| "quotes"
+	| "avoid"
+	| "glossary";
 
 const draftCollection: Record<Published, string> = {
 	posts: "postDrafts",
@@ -9,6 +23,14 @@ const draftCollection: Record<Published, string> = {
 	tils: "tilDrafts",
 	pages: "pageDrafts",
 	trips: "tripDrafts",
+	positions: "positionDrafts",
+	topics: "topicDrafts",
+	projects: "projectDrafts",
+	talks: "talkDrafts",
+	books: "bookDrafts",
+	quotes: "quoteDrafts",
+	avoid: "avoidDrafts",
+	glossary: "glossaryDrafts",
 };
 
 export type Entry<C extends Published> = CollectionEntry<C> & {
@@ -21,6 +43,14 @@ export type Til = Entry<"tils">;
 export type Page = Entry<"pages">;
 export type Trip = Entry<"trips">;
 export type Photo = Trip["data"]["photos"][number];
+export type Position = Entry<"positions">;
+export type Topic = Entry<"topics">;
+export type Project = Entry<"projects">;
+export type Talk = Entry<"talks">;
+export type Book = Entry<"books">;
+export type Quote = Entry<"quotes">;
+export type Avoid = Entry<"avoid">;
+export type Term = Entry<"glossary">;
 
 // Published entries, plus drafts when running `astro dev`.
 async function load<C extends Published>(name: C): Promise<Entry<C>[]> {
@@ -43,6 +73,34 @@ export const getNotes = async () => (await load("notes")).sort(newestFirst);
 export const getLinks = async () => (await load("links")).sort(newestFirst);
 export const getTils = async () => (await load("tils")).sort(newestFirst);
 export const getPages = () => load("pages");
+export const getPositions = async () =>
+	(await load("positions")).sort(
+		(a, b) => b.data.updated.valueOf() - a.data.updated.valueOf(),
+	);
+export const getTopics = async () =>
+	(await load("topics")).sort(
+		(a, b) =>
+			a.data.order - b.data.order || a.data.title.localeCompare(b.data.title),
+	);
+export const getProjects = async () =>
+	(await load("projects")).sort(
+		(a, b) => b.data.start.valueOf() - a.data.start.valueOf(),
+	);
+export const getTalks = async () => (await load("talks")).sort(newestFirst);
+export const getBooks = async () =>
+	(await load("books")).sort(
+		(a, b) => (bookDate(b)?.valueOf() ?? 0) - (bookDate(a)?.valueOf() ?? 0),
+	);
+export const getQuotes = async () => (await load("quotes")).sort(newestFirst);
+export const getAvoid = async () =>
+	(await load("avoid")).sort((a, b) => a.data.name.localeCompare(b.data.name));
+export const getGlossary = async () =>
+	(await load("glossary")).sort((a, b) =>
+		a.data.term.localeCompare(b.data.term),
+	);
+
+export const bookDate = (book: Book) => book.data.finished ?? book.data.started;
+
 export const getTrips = async () =>
 	(await load("trips")).sort(
 		(a, b) => b.data.start.valueOf() - a.data.start.valueOf(),
@@ -67,6 +125,19 @@ export const linkUrl = (link: Link) => `/links/#${linkAnchor(link)}`;
 // Same slugs as on tils.kanishkk.xyz/post/<slug>, so old links redirect 1:1.
 export const tilUrl = (til: Til) => `/tils/${til.id}/`;
 export const tilTopicUrl = (tag: string) => `/tils/topics/${tagSlug(tag)}/`;
+export const positionUrl = (p: Position) => `/positions/${p.id}/`;
+export const topicUrl = (t: Topic) => `/topics/${t.id}/`;
+export const projectUrl = (p: Project) => `/projects/${p.id}/`;
+export const talkUrl = (t: Talk) => `/talks/#${t.id}`;
+export const bookUrl = (b: Book) => `/books/${b.id}/`;
+export const quoteUrl = (q: Quote) => `/quotes/#${q.id}`;
+export const termUrl = (t: Term) => `/glossary/#${t.id}`;
+
+export const confidenceLabels = {
+	idea: "early idea",
+	developing: "developing",
+	settled: "settled",
+} as const;
 // Trips are stored as trips/<slug>/index.md.
 export const tripSlug = (trip: Trip) => trip.id.replace(/\/index$/, "");
 export const tripUrl = (trip: Trip) => `/travel/${tripSlug(trip)}/`;
@@ -146,7 +217,16 @@ export type Item = {
 	title: string;
 	href: string;
 	// What kind of thing it is, shown on mixed lists (archive, tags).
-	label: Kind | "note" | "link" | "til" | "trip";
+	label:
+		| Kind
+		| "note"
+		| "link"
+		| "til"
+		| "trip"
+		| "position"
+		| "project"
+		| "talk"
+		| "book";
 	detail?: string;
 	tags: string[];
 	isDraft: boolean;
@@ -210,20 +290,75 @@ export const tripItem = (trip: Trip): Item => ({
 	isDraft: trip.isDraft,
 });
 
+export const positionItem = (p: Position): Item => ({
+	date: p.data.updated,
+	title: p.data.title,
+	href: positionUrl(p),
+	label: "position",
+	detail: confidenceLabels[p.data.confidence],
+	tags: p.data.tags,
+	isDraft: p.isDraft,
+});
+
+export const projectItem = (p: Project): Item => ({
+	date: p.data.start,
+	title: p.data.title,
+	href: projectUrl(p),
+	label: "project",
+	detail: p.data.role,
+	tags: p.data.tags,
+	isDraft: p.isDraft,
+});
+
+export const talkItem = (t: Talk): Item => ({
+	date: t.data.date,
+	title: t.data.title,
+	href: talkUrl(t),
+	label: "talk",
+	detail: t.data.event,
+	tags: t.data.tags,
+	isDraft: t.isDraft,
+});
+
+// Books appear in dated lists only once started or finished.
+export const bookItem = (b: Book): Item | null => {
+	const date = bookDate(b);
+	return date
+		? {
+				date,
+				title: b.data.title,
+				href: bookUrl(b),
+				label: "book",
+				detail: b.data.author,
+				tags: b.data.tags,
+				isDraft: b.isDraft,
+			}
+		: null;
+};
+
 export async function getAllItems() {
-	const [posts, notes, links, tils, trips] = await Promise.all([
-		getPosts(),
-		getNotes(),
-		getLinks(),
-		getTils(),
-		getTrips(),
-	]);
+	const [posts, notes, links, tils, trips, positions, projects, talks, books] =
+		await Promise.all([
+			getPosts(),
+			getNotes(),
+			getLinks(),
+			getTils(),
+			getTrips(),
+			getPositions(),
+			getProjects(),
+			getTalks(),
+			getBooks(),
+		]);
 	return [
 		...posts.map(postItem),
 		...notes.map(noteItem),
 		...links.map(linkItem),
 		...tils.map(tilItem),
 		...trips.map(tripItem),
+		...positions.map(positionItem),
+		...projects.map(projectItem),
+		...talks.map(talkItem),
+		...books.map(bookItem).filter((item): item is Item => item !== null),
 	].sort((a, b) => b.date.valueOf() - a.date.valueOf());
 }
 

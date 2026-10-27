@@ -2,6 +2,8 @@
 import { getImage } from "astro:assets";
 import { render } from "astro:content";
 import type { GetStaticPaths } from "astro";
+import Backlinks from "@/components/Backlinks.astro";
+import Confidence from "@/components/Confidence.astro";
 import EntryEnd from "@/components/EntryEnd.astro";
 import Base from "@/layouts/Base.astro";
 import {
@@ -49,6 +51,7 @@ const kindLabel = kinds[kind].label;
 	image={og?.src}
 	type="article"
 	isDraft={post.isDraft}
+	searchable
 	crumbs={[
 		{ label: "Writing", href: "/writing/" },
 		{ label: kindLabel, href: `/writing/${kinds[kind].slug}/` },
@@ -61,8 +64,10 @@ const kindLabel = kinds[kind].label;
 			<time datetime={isoDate(date)}>{isoDate(date)}</time>
 			{updated && <>{" · "}updated <time datetime={isoDate(updated)}>{isoDate(updated)}</time></>}
 			{" · "}{readingMinutes(post.body)} min read
+			<Confidence level={post.data.confidence} />
 		</p>
 		<Content />
+		<Backlinks url={postUrl(post)} />
 		<EntryEnd fediverse={fediverse} tags={tags}>
 			{
 				(newer || older) && (

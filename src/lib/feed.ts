@@ -4,12 +4,16 @@ import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import sanitizeHtml from "sanitize-html";
 import { site } from "@/config";
 import {
+	confidenceLabels,
 	coverOf,
+	isoDate,
 	type Link,
 	type Note,
 	noteLabel,
 	noteUrl,
+	type Position,
 	type Post,
+	positionUrl,
 	postUrl,
 	type Til,
 	type Trip,
@@ -24,7 +28,7 @@ let container: AstroContainer | undefined;
 
 // The entry's HTML exactly as the site renders it, with absolute URLs so
 // images and links work in feed readers.
-async function html(entry: Post | Note | Link | Til | Trip) {
+async function html(entry: Post | Note | Link | Til | Trip | Position) {
 	container ??= await AstroContainer.create();
 	const { Content } = await render(entry);
 	const out = await container.renderToString(Content);
@@ -73,6 +77,30 @@ export async function noteFeedItem(note: Note): Promise<RSSFeedItem> {
 		link: noteUrl(note),
 		categories: note.data.tags,
 		content: lead + (await html(note)),
+	};
+}
+
+export async function positionFeedItem(p: Position): Promise<RSSFeedItem> {
+	const { title, summary, confidence, updated, changeMind, history } = p.data;
+	const latest = history[0];
+	const parts = [
+		`<p><strong>My view</strong> (${confidenceLabels[confidence]}): ${escapeHtml(summary)}</p>`,
+		latest
+			? `<p><strong>What changed (${isoDate(latest.date)}):</strong> ${escapeHtml(latest.change)}</p>`
+			: "",
+		await html(p),
+		changeMind
+			? `<p><strong>What would change my mind:</strong> ${escapeHtml(changeMind)}</p>`
+			: "",
+	];
+	return {
+		title: history.length > 0 ? `${title} (updated)` : title,
+		pubDate: updated,
+		description: summary,
+		// Keyed by date, so a changed view reaches readers as a new item.
+		link: `${positionUrl(p)}#updated-${isoDate(updated)}`,
+		categories: p.data.tags,
+		content: parts.join(""),
 	};
 }
 

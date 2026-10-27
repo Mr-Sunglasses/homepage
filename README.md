@@ -27,6 +27,14 @@ pnpm new post "Title" [--kind article|poem|thought]
 pnpm new note ["Title"] [--link https://…]
 pnpm new link https://… "Title"
 pnpm new til "Title" [--tags git,bash]
+pnpm new position "Software freedom"
+pnpm new topic "Self-hosting" --tags selfhosting,homelab
+pnpm new project "Name" [--repo https://…]
+pnpm new talk "Title" --event "PyCon India" [--start YYYY-MM-DD]
+pnpm new book "Title" --author "Name" [--status reading|read|want]
+pnpm new quote "Author"
+pnpm new avoid "Name" --instead "Alternative" --category "Messaging"
+pnpm new term "Free software"
 pnpm new page now
 pnpm new trip "Ladakh" --start 2026-10-02 [--end 2026-10-12] --region india|world
 
@@ -40,6 +48,24 @@ Three guards keep drafts private:
   `drafts/` and any file with a `draft:` key.
 - Content schemas are strict, so a `draft:` key fails the build; CI also
   re-runs the drafts check on every push.
+
+## A knowledge base, not just a blog
+
+- **Positions** (`/positions/`): what I believe, kept current. Each has a
+  confidence level, when it was last reviewed, what would change my mind,
+  and a dated history of changes. The positions feed announces changes.
+- **Topics** (`/topics/`): a written introduction to a theme, then
+  everything tagged with it.
+- **Links between pages:** write `[[slug]]`, `[[collection/slug]]` or
+  `[[slug|label]]` anywhere; every page lists what links to it ("Mentioned
+  in"). A link to a missing page or a draft fails the build.
+- **About** is a hub for Projects, Talks, Books, Quotes, Things I avoid,
+  the Glossary, Now and Uses.
+- **Confidence** (`confidence: idea | developing | settled`) on posts,
+  notes and positions.
+- **Search** (`/search/`): Pagefind, built with the site. It's the only
+  public page with JavaScript, and runs entirely in the browser. The index
+  exists after `pnpm build`; try it with `pnpm preview`.
 
 ## Admin panel
 
@@ -91,7 +117,8 @@ pnpm dev                                                  # photos load from the
 
 The pre-commit hook and CI refuse drafts and images with private metadata.
 CI also runs lint, unit tests, the type check, a build, and
-`scripts/check-built.mjs`: no JavaScript on any page, alt text on every image,
+`scripts/check-built.mjs`: no JavaScript outside search, every internal link
+and anchor resolves, alt text on every image,
 and a homepage under 30 KB.
 
 ## Layout

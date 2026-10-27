@@ -1,0 +1,34 @@
+---
+import { type Book, bookUrl } from "@/lib/content";
+
+// One shelf on /books/: title, author, and rating if read.
+interface Props {
+	title: string;
+	books: Book[];
+}
+
+const { title, books } = Astro.props;
+const stars = (n?: number) => (n ? "★".repeat(n) + "☆".repeat(5 - n) : "");
+---
+
+<section>
+	<h2 class="year">{title}</h2>
+	<ul class="rows">
+		{
+			books.map((book) => (
+				<li class="row">
+					<span class="meta stars" aria-label={book.data.rating ? `${book.data.rating} out of 5` : undefined}>
+						{stars(book.data.rating)}
+					</span>
+					<div class="row-body">
+						<span class="row-title">
+							<a href={bookUrl(book)}>{book.data.title}</a>
+							<span class="detail">{book.data.author}</span>
+							{book.isDraft && <span class="draft-mark">draft</span>}
+						</span>
+					</div>
+				</li>
+			))
+		}
+	</ul>
+</section>

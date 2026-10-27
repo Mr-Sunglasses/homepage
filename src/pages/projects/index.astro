@@ -1,0 +1,55 @@
+---
+import Base from "@/layouts/Base.astro";
+import { getProjects, type Project, projectUrl } from "@/lib/content";
+
+const projects = await getProjects();
+const years = (p: Project) => {
+	const start = p.data.start.getUTCFullYear();
+	const end = p.data.end?.getUTCFullYear();
+	return p.data.status === "past"
+		? end && end !== start
+			? `${start}–${end}`
+			: `${start}`
+		: `${start}–`;
+};
+const groups = [
+	{ title: "Active", status: "active" },
+	{ title: "Maintained", status: "maintained" },
+	{ title: "Past", status: "past" },
+].map((g) => ({
+	...g,
+	projects: projects.filter((p) => p.data.status === g.status),
+}));
+---
+
+<Base title="Projects" description="Things I've built and work I've contributed to." crumbs={[{ label: "About", href: "/about/" }, { label: "Projects" }]}>
+	<h1>Projects</h1>
+	<p>Things I've built, and open-source work I've contributed to. Code is on <a href="https://github.com/Mr-Sunglasses">GitHub</a>.</p>
+	{projects.length === 0 && <p class="empty">No projects listed yet.</p>}
+	{
+		groups.map(
+			({ title, projects }) =>
+				projects.length > 0 && (
+					<section>
+						<h2 class="year">{title}</h2>
+						<ul class="blocks">
+							{projects.map((p) => (
+								<li>
+									<a class="block-title" href={projectUrl(p)}>
+										{p.data.title}
+									</a>
+									{p.isDraft && <span class="draft-mark">draft</span>}
+									<p>{p.data.summary}</p>
+									<p class="meta">
+										{[years(p), p.data.role].filter(Boolean).join(" · ")}
+										{p.data.repo && <>{" · "}<a href={p.data.repo}>code</a></>}
+										{p.data.url && <>{" · "}<a href={p.data.url}>website</a></>}
+									</p>
+								</li>
+							))}
+						</ul>
+					</section>
+				),
+		)
+	}
+</Base>

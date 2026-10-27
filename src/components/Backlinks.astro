@@ -1,0 +1,41 @@
+---
+import { mentionsOf } from "@/lib/backlinks";
+
+// "Mentioned in": every page that links here.
+interface Props {
+	url: string;
+}
+
+const mentions = mentionsOf(Astro.props.url);
+const names: Record<string, string> = {
+	posts: "writing",
+	notes: "note",
+	links: "link",
+	tils: "TIL",
+	trips: "trip",
+	pages: "page",
+	positions: "position",
+	topics: "topic",
+	projects: "project",
+	talks: "talk",
+	books: "book",
+	quotes: "quote",
+	avoid: "things I avoid",
+	glossary: "glossary",
+};
+---
+
+{
+	mentions.length > 0 && (
+		<section class="backlinks" aria-label="Mentioned in" data-pagefind-ignore>
+			<h2>Mentioned in</h2>
+			<ul>
+				{mentions.map((m) => (
+					<li>
+						<a href={m.url}>{m.title}</a> <span class="meta">{names[m.collection]}</span>
+					</li>
+				))}
+			</ul>
+		</section>
+	)
+}
