@@ -16,8 +16,12 @@ const count = (n: number, one: string, many: string) =>
 	`${n} ${n === 1 ? one : many}`;
 
 // Everything about me beyond the posts: shown on the homepage and on About.
-// Only sections with something in them.
-export async function hubSections(): Promise<HubSection[]> {
+// Only sections with something in them. Contact and the résumé aren't here:
+// the footer links them on every page. `exclude` drops sections the page
+// already shows in full (the homepage has its own Now and Positions blocks).
+export async function hubSections(
+	exclude: string[] = [],
+): Promise<HubSection[]> {
 	const [
 		pages,
 		projects,
@@ -39,7 +43,8 @@ export async function hubSections(): Promise<HubSection[]> {
 		getTopics(),
 		getPositions(),
 	]);
-	const hasPage = (id: string) => pages.some((page) => page.id === id);
+	const hasPage = (id: string) =>
+		pages.some((page) => page.id === id && page.body?.trim());
 	return [
 		hasPage("now") && {
 			href: "/now/",
@@ -91,11 +96,7 @@ export async function hubSections(): Promise<HubSection[]> {
 			label: "Uses",
 			detail: "the tools I use",
 		},
-		hasPage("contact") && {
-			href: "/contact/",
-			label: "Contact",
-			detail: "email, Fediverse, GPG key",
-		},
-		{ href: "/resume.pdf", label: "Résumé", detail: "PDF" },
-	].filter((s): s is HubSection => Boolean(s));
+	]
+		.filter((s): s is HubSection => Boolean(s))
+		.filter((s) => !exclude.includes(s.href));
 }

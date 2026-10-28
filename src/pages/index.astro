@@ -40,9 +40,17 @@ const [posts, notes, links, pages, trips, tils, positions, topics] =
 		getPositions(),
 		getTopics(),
 	]);
-const now = pages.find((page) => page.id === "now");
+// An empty Now page (just started) isn't shown.
+const now = pages.find((page) => page.id === "now" && page.body?.trim());
 const Now = now ? (await render(now)).Content : null;
-const hub = await hubSections();
+// The hub skips what this page already shows in full.
+const hub = await hubSections(
+	[
+		now && "/now/",
+		topics.length > 0 && "/topics/",
+		positions.length > 0 && "/positions/",
+	].filter((href): href is string => Boolean(href)),
+);
 ---
 
 <Base>
@@ -66,7 +74,7 @@ const hub = await hubSections();
 	{
 		topics.length > 0 && (
 			<p class="filters topics-line">
-				Start with a topic:{" "}
+				Start with a <a href="/topics/">topic</a>:{" "}
 				{topics.map((t, i) => (
 					<>
 						{i > 0 && " · "}
