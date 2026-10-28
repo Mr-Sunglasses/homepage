@@ -6,6 +6,8 @@ import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
 import { unified } from "unified";
 import { describe, rehypeEmbedsToLinks } from "./rehype-embeds-to-links.mjs";
+import { COLUMN_SIZES, rehypeImageHints } from "./rehype-image-hints.mjs";
+import { rehypeLangHindi } from "./rehype-lang-hindi.mjs";
 import { remarkDropTitleHeading } from "./remark-drop-title-heading.mjs";
 import { remarkPlainDirectives } from "./remark-plain-directives.mjs";
 
@@ -107,4 +109,46 @@ test("a different first heading is kept", async () => {
 test("a repeated title later in the post is kept", async () => {
 	const html = await withTitle("Intro.\n\n# Mastering Cron", "Mastering Cron");
 	assert.match(html, /<h1>Mastering Cron<\/h1>/);
+});
+
+const withRehype = async (markdown, plugin) =>
+	String(
+		await unified()
+			.use(remarkParse)
+			.use(remarkRehype)
+			.use(plugin)
+			.use(rehypeStringify)
+			.process(markdown),
+	);
+
+test("an image at the top loads first; later ones stay lazy", async () => {
+	const html = await withRehype(
+		"![cover](a.jpg)\n\ntext\n\n![later](b.jpg)",
+		rehypeImageHints,
+	);
+	assert.match(
+		html,
+		/alt="cover" sizes="[^"]+" loading="eager" fetchpriority="high"/,
+	);
+	assert.doesNotMatch(html, /alt="later"[^>]*eager/);
+	assert.equal(html.split(`sizes="${COLUMN_SIZES}"`).length - 1, 2);
+});
+
+test("an image further down doesn't load early", async () => {
+	const html = await withRehype(
+		"one\n\ntwo\n\nthree\n\n![late](a.jpg)",
+		rehypeImageHints,
+	);
+	assert.doesNotMatch(html, /eager/);
+});
+
+test("Devanagari is marked as Hindi, code is left alone", async () => {
+	const html = await withRehype(
+		"He said गुनाहों का देवता, a classic. `नमस्ते`",
+		rehypeLangHindi,
+	);
+	assert.equal(
+		html,
+		'<p>He said <span lang="hi">गुनाहों का देवता</span>, a classic. <code>नमस्ते</code></p>',
+	);
 });

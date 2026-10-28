@@ -15,22 +15,24 @@ const { date, title, link, linkTitle } = note.data;
 const Heading = headingLevel === 1 ? "h1" : "h2";
 ---
 
-<article class="note" id={note.id.split("/").pop()}>
+<article class="note h-entry" id={note.id.split("/").pop()}>
 	<p class="meta">
-		<a href={noteUrl(note)}><time datetime={isoDate(date)}>{isoDate(date)}</time></a>
+		<a class="u-url" href={noteUrl(note)}><time class="dt-published" datetime={isoDate(date)}>{isoDate(date)}</time></a>
 		<Confidence level={note.data.confidence} />
 		{note.isDraft && <span class="draft-mark">draft</span>}
 	</p>
 	{
 		link ? (
 			<Heading>
-				↗ <a href={link}>{linkTitle ?? title ?? domainOf(link)}</a>
+				<span aria-hidden="true">↗</span> <a class="u-bookmark-of" href={link}>{linkTitle ?? title ?? domainOf(link)}</a>
 				{(linkTitle ?? title) && <span class="meta"> ({domainOf(link)})</span>}
 			</Heading>
 		) : (
-			title && <Heading>{title}</Heading>
+			title && <Heading class="p-name">{title}</Heading>
 		)
 	}
-	<Content />
+	<div class="e-content">
+		<Content />
+	</div>
 	<slot />
 </article>

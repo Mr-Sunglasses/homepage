@@ -8,4 +8,4 @@ Watch fifa worldcup for free using this iptv link: [http://61ce5915.amazzin.pw/i
 
 - Use VLC media player to stream.
 
-![Support Argentina](https://fotos.perfil.com/2026/06/19/trim/720/405/messi-algeria-world-cup-2264586.jpg)
+Support Argentina! ([photo](https://fotos.perfil.com/2026/06/19/trim/720/405/messi-algeria-world-cup-2264586.jpg))

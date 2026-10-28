@@ -228,6 +228,9 @@ export type Item = {
 		| "talk"
 		| "book";
 	detail?: string;
+	// A note about something elsewhere: shown with ↗ (hidden from screen
+	// readers, which would read "north east arrow").
+	bookmark?: boolean;
 	tags: string[];
 	isDraft: boolean;
 	external?: boolean;
@@ -245,8 +248,9 @@ export const postItem = (post: Post): Item => ({
 export const noteItem = (note: Note): Item => ({
 	date: note.data.date,
 	title: note.data.link
-		? `↗ ${note.data.linkTitle ?? note.data.title ?? domainOf(note.data.link)}`
+		? (note.data.linkTitle ?? note.data.title ?? domainOf(note.data.link))
 		: noteLabel(note),
+	bookmark: Boolean(note.data.link),
 	href: noteUrl(note),
 	label: "note",
 	tags: note.data.tags,

@@ -21,7 +21,7 @@ const meta = [
 	<time datetime={isoDate(item.date)}>{isoDate(item.date)}</time>
 	<div class="row-body">
 		<span class="row-title">
-			<a href={item.href}>{item.title}</a>
+			<a href={item.href}>{item.bookmark && <span aria-hidden="true">↗ </span>}{item.title}</a>
 			{item.detail && <span class="detail">{item.detail}</span>}
 			{item.isDraft && <span class="draft-mark">draft</span>}
 		</span>

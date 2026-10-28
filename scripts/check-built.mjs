@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 // Checks the built site in dist/ (run after `pnpm build`):
 //   - no page loads JavaScript, except search and the admin panel
+//   - no page loads anything from another site (images, styles, scripts,
+//     media), which would tell that site who's reading; travel photos come
+//     from the photo host
 //   - every image has alt text (a trip can't be published with undescribed photos)
 //   - every link to this site points at a page (and anchor) that exists
 //   - the homepage stays small
@@ -9,13 +12,47 @@ import { join, relative } from "node:path";
 import { pathToFileURL } from "node:url";
 
 const HOMEPAGE_LIMIT = 30 * 1024;
+const PHOTO_HOST = new URL(
+	process.env.PUBLIC_PHOTOS_URL ?? "https://photos.kanishkk.xyz",
+).host;
 // Pages allowed to load JavaScript.
 const SCRIPTED = new Set(["search/index.html"]);
 
-export function checkPage(path, html, { scripted = false } = {}) {
+/** URLs a page loads by itself (not links the reader follows). */
+export function loadedUrls(html) {
+	const tags =
+		/<(img|source|video|audio|track|script|iframe|embed|object|link)\b[^>]*>/gi;
+	return [...html.matchAll(tags)]
+		.filter(
+			([tag, name]) =>
+				name.toLowerCase() !== "link" ||
+				/\brel="(?:stylesheet|preload|modulepreload|icon|apple-touch-icon)"/i.test(
+					tag,
+				),
+		)
+		.flatMap(([tag]) =>
+			[
+				...tag.matchAll(/\b(?:src|href|srcset|poster|data)="([^"]*)"/gi),
+			].flatMap(([, value]) =>
+				value.split(",").map((part) => part.trim().split(/\s+/)[0]),
+			),
+		);
+}
+
+export function checkPage(
+	path,
+	html,
+	{ scripted = false, photoHost = PHOTO_HOST } = {},
+) {
 	const problems = [];
 	if (!scripted && /<script\b/i.test(html))
 		problems.push(`${path}: loads JavaScript`);
+	for (const url of new Set(loadedUrls(html))) {
+		if (!/^(https?:)?\/\//i.test(url)) continue;
+		const host = new URL(url, "https://kanishkk.xyz").host;
+		if (host !== "kanishkk.xyz" && host !== photoHost)
+			problems.push(`${path}: loads ${url} from another site`);
+	}
 	for (const [tag] of html.matchAll(/<img\b[^>]*>/gi)) {
 		const alt = tag.match(/\balt\s*=\s*("([^"]*)"|'([^']*)')/i);
 		if (!alt || (alt[2] ?? alt[3]).trim() === "") {
@@ -98,6 +135,6 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
 		process.exit(1);
 	}
 	console.log(
-		`Built site OK: ${pages.length} pages, no JavaScript outside search, every image has alt text, every internal link resolves, homepage ${home} bytes.`,
+		`Built site OK: ${pages.length} pages, no JavaScript outside search, nothing loaded from other sites, every image has alt text, every internal link resolves, homepage ${home} bytes.`,
 	);
 }

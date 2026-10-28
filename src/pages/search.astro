@@ -6,7 +6,7 @@ import Base from "@/layouts/Base.astro";
 // Nothing is sent anywhere. The index only exists after `pnpm build`.
 ---
 
-<Base title="Search" description="Search everything on this site." crumbs={[{ label: "Search" }]}>
+<Base title="Search" description="Search everything on this site." crumbs={[{ label: "Search" }]} scripts>
 	<h1>Search</h1>
 	<div id="search"></div>
 	<noscript>
@@ -23,9 +23,5 @@ import Base from "@/layouts/Base.astro";
 	}
 	<link rel="stylesheet" href="/pagefind/pagefind-ui.css" />
 	<script is:inline src="/pagefind/pagefind-ui.js"></script>
-	<script is:inline>
-		if (window.PagefindUI) {
-			new PagefindUI({ element: "#search", showSubResults: true, showImages: false, autofocus: true });
-		}
-	</script>
+	<script is:inline src="/search.js"></script>
 </Base>

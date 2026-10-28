@@ -13,16 +13,20 @@ interface Props {
 	type?: "website" | "article";
 	// Include this page in site search (entries, not lists).
 	searchable?: boolean;
+	// The page runs its own scripts (only search does); every other page is
+	// forbidden from running any.
+	scripts?: boolean;
 }
 
 const {
 	title,
 	description = site.description,
-	image = "/og.png",
+	image = "/og.jpg",
 	crumbs = [],
 	isDraft = false,
 	type = "website",
 	searchable = false,
+	scripts = false,
 } = Astro.props;
 
 const pageTitle = title ? `${title} · ${site.name}` : site.name;
@@ -31,18 +35,38 @@ const imageUrl = new URL(image, Astro.site);
 const path = Astro.url.pathname;
 const current = (href: string) =>
 	href === "/" ? path === "/" : path.startsWith(href);
+
+// What a page may load: only this site and the photo host, never another
+// site's scripts, fonts or trackers. Not in dev, where Vite injects scripts.
+const photos = new URL(
+	import.meta.env.PUBLIC_PHOTOS_URL ?? "https://photos.kanishkk.xyz",
+).origin;
+const csp = [
+	"default-src 'self'",
+	`img-src 'self' data: ${photos}`,
+	"style-src 'self' 'unsafe-inline'",
+	scripts ? "script-src 'self' 'wasm-unsafe-eval'" : "script-src 'none'",
+	"object-src 'none'",
+	"base-uri 'self'",
+	"form-action 'self'",
+].join("; ");
 ---
 
 <!doctype html>
 <html lang={site.lang}>
 	<head>
 		<meta charset="utf-8" />
+		{!import.meta.env.DEV && <meta http-equiv="Content-Security-Policy" content={csp} />}
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>{pageTitle}</title>
 		<meta name="description" content={description} />
 		<link rel="canonical" href={canonical} />
 		{isDraft && <meta name="robots" content="noindex, nofollow" />}
 		<meta name="color-scheme" content="light dark" />
+		<meta name="theme-color" content="#fdfdfc" media="(prefers-color-scheme: light)" />
+		<meta name="theme-color" content="#15171a" media="(prefers-color-scheme: dark)" />
+		<link rel="author" href="/" />
+		<link rel="license" href={site.license.url} />
 
 		<meta property="og:site_name" content={site.name} />
 		<meta property="og:type" content={type} />
@@ -110,11 +134,11 @@ const current = (href: string) =>
 
 		<footer class="site-footer" data-pagefind-ignore>
 			<ul class="inline-list">
-				{elsewhere.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
+				{elsewhere.map((item) => <li><a href={item.href} rel={item.me ? "me" : undefined}>{item.label}</a></li>)}
 			</ul>
 			<p>
-				Content <a href={site.license.url}>{site.license.name}</a> · No tracking · No JavaScript needed
-				· <a href={site.source}>Source</a>
+				Content <a href={site.license.url} rel="license">{site.license.name}</a> · No tracking · No JavaScript needed
+				· <a href={site.source}>Source</a> (AGPL)
 			</p>
 		</footer>
 	</body>

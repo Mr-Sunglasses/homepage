@@ -33,10 +33,11 @@ export const nav = [
 	{ label: "Search", href: "/search/" },
 ];
 
+// `me`: profiles that are me (rel="me"), so each can verify the other.
 export const elsewhere = [
-	{ label: "GitHub", href: "https://github.com/Mr-Sunglasses" },
-	{ label: "Fosstodon", href: "https://fosstodon.org/@itskanishkp" },
-	{ label: "X", href: "https://x.com/itskanishkp" },
+	{ label: "GitHub", href: "https://github.com/Mr-Sunglasses", me: true },
+	{ label: "Fosstodon", href: "https://fosstodon.org/@itskanishkp", me: true },
+	{ label: "X", href: "https://x.com/itskanishkp", me: true },
 	{ label: "RSS", href: "/rss.xml" },
 	{ label: "Contact & GPG", href: "/contact/" },
 	{ label: "Résumé", href: "/resume.pdf" },

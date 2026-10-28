@@ -117,9 +117,29 @@ pnpm dev                                                  # photos load from the
 
 The pre-commit hook and CI refuse drafts and images with private metadata.
 CI also runs lint, unit tests, the type check, a build, and
-`scripts/check-built.mjs`: no JavaScript outside search, every internal link
-and anchor resolves, alt text on every image,
+`scripts/check-built.mjs`: no JavaScript outside search, nothing loaded from
+another site (images, styles, scripts; travel photos come from the photo
+host), every internal link and anchor resolves, alt text on every image,
 and a homepage under 30 KB.
+
+## Open, light and accessible
+
+- **Nothing from other sites.** No trackers, fonts, embeds or hotlinked
+  images: a reader's browser only talks to this site (and the photo host).
+  Each page's Content-Security-Policy enforces it; only /search/ may run
+  scripts, and only this site's own. Put images in the repo, not links to
+  them.
+- **IndieWeb.** The homepage is an h-card, posts, TILs and notes are
+  h-entries, profiles are linked with `rel="me"`. Feeds for everything.
+- **Light.** System fonts, CSS inlined (~2.5 KB compressed), images in
+  Markdown get a srcset sized to the text column, the first image near the
+  top loads first. `public/_headers` caches hashed assets for a year.
+- **Accessible.** Landmarks and a skip link, visible focus, alt text
+  required, contrast at least 4.5:1 in both themes, Hindi (Devanagari) text
+  is marked `lang="hi"` so screen readers pronounce it, decorative symbols
+  are hidden from them.
+- The default share image is `public/og.jpg`; after changing the photo or
+  the intro, redraw it with `node scripts/make-og.mjs`.
 
 ## Layout
 
@@ -130,10 +150,12 @@ src/content/links/   recommended links, by year
 src/content/tils/    Today I Learned (URLs: /tils/<slug>/, same slugs as tils.kanishkk.xyz/post/<slug>)
 src/content/pages/   about, contact, now, uses
 src/content/trips/   one folder per trip: index.md with the story and photo list
-src/plugins/         Markdown plugins (callouts, iframes → links, title headings)
+src/plugins/         Markdown plugins (callouts, iframes → links, title headings,
+                     wiki links, image hints, Hindi language marks)
 scripts/             new, promote, photos-import/verify, checks, local stores
 public/admin/        the admin panel
 public/_redirects    old blog URLs → new ones (Netlify)
+public/_headers      caching and security headers (Netlify)
 ```
 
 Replies happen on Fosstodon: add the toot's URL as `fediverse:` in a post's
@@ -141,4 +163,8 @@ frontmatter after sharing it.
 
 ## License
 
-Content is [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
+Code is free software under the [GNU AGPL, version 3 or later](LICENSE):
+reuse it, and if you run a modified version as a website, share your changes.
+
+Content (writing, notes and photos) is
+[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).

@@ -58,15 +58,17 @@ const kindLabel = kinds[kind].label;
 		{ label: title },
 	]}
 >
-	<article>
-		<h1>{title}</h1>
+	<article class="h-entry">
+		<h1 class="p-name">{title}</h1>
 		<p class="entry-meta">
-			<time datetime={isoDate(date)}>{isoDate(date)}</time>
-			{updated && <>{" · "}updated <time datetime={isoDate(updated)}>{isoDate(updated)}</time></>}
+			<a class="u-url" href={postUrl(post)}><time class="dt-published" datetime={isoDate(date)}>{isoDate(date)}</time></a>
+			{updated && <>{" · "}updated <time class="dt-updated" datetime={isoDate(updated)}>{isoDate(updated)}</time></>}
 			{" · "}{readingMinutes(post.body)} min read
 			<Confidence level={post.data.confidence} />
 		</p>
-		<Content />
+		<div class="e-content">
+			<Content />
+		</div>
 		<Backlinks url={postUrl(post)} />
 		<EntryEnd fediverse={fediverse} tags={tags}>
 			{

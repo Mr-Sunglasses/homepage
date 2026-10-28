@@ -7,7 +7,7 @@ import rehypeStringify from "rehype-stringify";
 import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
 import { unified } from "unified";
-import { linkTarget } from "../../scripts/check-built.mjs";
+import { checkPage, linkTarget } from "../../scripts/check-built.mjs";
 import { buildIndex, outgoing, resolve } from "../lib/wiki.mjs";
 import { remarkWikiLinks } from "./remark-wiki-links.mjs";
 
@@ -155,4 +155,18 @@ test("built-site link check: pages, files and anchors", () => {
 	);
 	assert.equal(linkTarget("/rss.xml", files), null);
 	assert.equal(linkTarget("/nowhere/", files), "missing page");
+});
+
+test("built-site check: nothing is loaded from another site", () => {
+	const page = [
+		'<a href="https://github.com/">a link is fine</a>',
+		'<link rel="alternate" href="https://example.org/feed">',
+		'<img alt="x" src="/assets/a.webp" srcset="/assets/a-400.webp 400w, https://photos.example/b.avif 800w">',
+		'<img alt="y" src="https://tracker.example/pixel.gif">',
+		'<link rel="stylesheet" href="https://fonts.example/css">',
+	].join("");
+	assert.deepEqual(checkPage("p.html", page, { photoHost: "photos.example" }), [
+		"p.html: loads https://tracker.example/pixel.gif from another site",
+		"p.html: loads https://fonts.example/css from another site",
+	]);
 });

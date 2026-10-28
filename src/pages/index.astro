@@ -46,19 +46,21 @@ const hub = await hubSections();
 ---
 
 <Base>
-	<div class="intro">
+	<div class="intro h-card">
 		<Picture
 			src={avatar}
 			alt="Kanishk Pachauri, smiling, in a black open-source T-shirt"
 			widths={[112, 224]}
 			sizes="7rem"
 			formats={["avif", "webp"]}
-			class="avatar"
+			class="avatar u-photo"
 			loading="eager"
 		/>
 		<div>
-			<h1>{site.name}</h1>
-			<p>{site.intro}</p>
+			<h1 class="p-name">{site.name}</h1>
+			<p class="p-note">{site.intro}</p>
+			<data class="u-url u-uid" value={site.url + "/"}></data>
+			<data class="p-nickname" value={site.title}></data>
 		</div>
 	</div>
 	{

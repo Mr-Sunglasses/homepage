@@ -28,10 +28,10 @@ const { title, date, tags, fediverse } = til.data;
 ---
 
 <Base title={title} type="article" isDraft={til.isDraft} searchable crumbs={[{ label: "TILs", href: "/tils/" }, { label: title }]}>
-	<article>
-		<h1>{title}</h1>
+	<article class="h-entry">
+		<h1 class="p-name">{title}</h1>
 		<p class="entry-meta">
-			<time datetime={isoDate(date)}>{isoDate(date)}</time>
+			<a class="u-url" href={tilUrl(til)}><time class="dt-published" datetime={isoDate(date)}>{isoDate(date)}</time></a>
 			{
 				tags.map((tag) => (
 					<>
@@ -41,7 +41,9 @@ const { title, date, tags, fediverse } = til.data;
 				))
 			}
 		</p>
-		<Content />
+		<div class="e-content">
+			<Content />
+		</div>
 		<Backlinks url={tilUrl(til)} />
 		<EntryEnd fediverse={fediverse}>
 			{
