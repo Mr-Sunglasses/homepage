@@ -1,4 +1,7 @@
 export const site = {
+	// The site's name, in the header. Page titles, feeds and search results
+	// use `name`, so people searching for me still find the site.
+	title: "Mr. Sunglasses",
 	name: "Kanishk Pachauri",
 	url: "https://kanishkk.xyz",
 	description:

@@ -588,6 +588,61 @@ td {
 .hub .row {
 	grid-template-columns: 9rem minmax(0, 1fr);
 }
+
+/* Homepage: photo and introduction, then the hub as a grid */
+.intro {
+	display: flex;
+	gap: 1.25rem;
+	align-items: center;
+	margin-bottom: 1rem;
+}
+.intro h1 {
+	margin: 0 0 0.3rem;
+}
+.intro p {
+	margin: 0;
+}
+.intro > picture {
+	flex: none;
+	line-height: 0;
+}
+.avatar {
+	width: 7rem;
+	height: 7rem;
+	border-radius: 50%;
+	border: 1px solid var(--line);
+	object-fit: cover;
+}
+@media (max-width: 34rem) {
+	.intro {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+	.avatar {
+		width: 5.5rem;
+		height: 5.5rem;
+	}
+}
+.hub-grid {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+	gap: 0.8rem 1.25rem;
+}
+.hub-grid li {
+	display: flex;
+	flex-direction: column;
+}
+.hub-grid a {
+	font-family: var(--sans);
+	font-weight: 600;
+}
+.hub-grid .detail {
+	color: var(--muted);
+	font-size: 0.85rem;
+}
 .topics-line a {
 	font-weight: 600;
 }

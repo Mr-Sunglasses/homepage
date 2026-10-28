@@ -1,5 +1,7 @@
 ---
+import { Picture } from "astro:assets";
 import { render } from "astro:content";
+import avatar from "@/assets/avatar.jpg";
 import Section from "@/components/Section.astro";
 import { site } from "@/config";
 import Base from "@/layouts/Base.astro";
@@ -21,6 +23,7 @@ import {
 	topicUrl,
 	tripItem,
 } from "@/lib/content";
+import { hubSections } from "@/lib/hub";
 
 // Each block shows a fixed number of rows, so the homepage stays the same
 // length however much is published. Full lists are on the section pages.
@@ -39,10 +42,25 @@ const [posts, notes, links, pages, trips, tils, positions, topics] =
 	]);
 const now = pages.find((page) => page.id === "now");
 const Now = now ? (await render(now)).Content : null;
+const hub = await hubSections();
 ---
 
 <Base>
-	<p>{site.intro}</p>
+	<div class="intro">
+		<Picture
+			src={avatar}
+			alt="Kanishk Pachauri, smiling, in a black open-source T-shirt"
+			widths={[112, 224]}
+			sizes="7rem"
+			formats={["avif", "webp"]}
+			class="avatar"
+			loading="eager"
+		/>
+		<div>
+			<h1>{site.name}</h1>
+			<p>{site.intro}</p>
+		</div>
+	</div>
 	{
 		topics.length > 0 && (
 			<p class="filters topics-line">
@@ -56,6 +74,23 @@ const Now = now ? (await render(now)).Content : null;
 			</p>
 		)
 	}
+
+	<section class="block">
+		<div class="section-head">
+			<h2><a href="/about/">More about me</a></h2>
+			<a href="/about/">about →</a>
+		</div>
+		<ul class="hub-grid">
+			{
+				hub.map((s) => (
+					<li>
+						<a href={s.href}>{s.label}</a>
+						<span class="detail">{s.detail}</span>
+					</li>
+				))
+			}
+		</ul>
+	</section>
 
 	{
 		now && Now && (
