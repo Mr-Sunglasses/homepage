@@ -4,3 +4,8 @@
 
 [build.environment]
   NODE_VERSION = "22"
+  # The site's build needs none of the photo-store settings (they're for
+  # `pnpm photos:import`). If they're set in Netlify anyway, R2_S3_REGION is
+  # "auto", a word all over the code, and not secret: don't let secrets
+  # scanning fail the deploy over it.
+  SECRETS_SCAN_OMIT_KEYS = "R2_S3_REGION"
