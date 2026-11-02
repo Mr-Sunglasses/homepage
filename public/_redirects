@@ -18,4 +18,6 @@ https://tils.kanishkk.xyz/*                    https://kanishkk.xyz/tils/       
 /posts/contact-me/  /contact/        301
 
 # Links from the blog before it moved to Astro (?action=view&url=<slug>).
-/ action=view url=:slug  /posts/:slug/  301
+# Forced (!): / always exists, and Netlify skips unforced rules for paths
+# that exist.
+/ action=view url=:slug  /posts/:slug/  301!
