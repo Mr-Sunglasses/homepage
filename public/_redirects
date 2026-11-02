@@ -17,6 +17,10 @@ https://tils.kanishkk.xyz/*                    https://kanishkk.xyz/tils/       
 /poems/*         /writing/poems/     301
 /posts/contact-me/  /contact/        301
 
+# WebFinger: any @name@kanishkk.xyz finds the Fosstodon account
+# (src/pages/.well-known/webfinger.json.ts). Served, not redirected.
+/.well-known/webfinger  /.well-known/webfinger.json  200
+
 # Links from the blog before it moved to Astro (?action=view&url=<slug>).
 # Forced (!): / always exists, and Netlify skips unforced rules for paths
 # that exist.

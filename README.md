@@ -131,6 +131,8 @@ and a homepage under 30 KB.
   them.
 - **IndieWeb.** The homepage is an h-card, posts, TILs and notes are
   h-entries, profiles are linked with `rel="me"`. Feeds for everything.
+  WebFinger makes any `@name@kanishkk.xyz` find my Fosstodon account
+  (`src/config.ts` decides which).
 - **Light.** System fonts, CSS inlined (~2.5 KB compressed), images in
   Markdown get a srcset sized to the text column, the first image near the
   top loads first. `public/_headers` caches hashed assets for a year.
