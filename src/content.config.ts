@@ -26,6 +26,8 @@ const posts = (base: string) =>
 				kind: z.enum(["article", "poem", "thought"]).default("article"),
 				tags: z.array(z.string()).default([]),
 				image: image().optional(),
+				// What the cover shows, for when it's the share image.
+				imageAlt: z.string().min(1).optional(),
 				confidence,
 				fediverse: z.url().optional(),
 			}),
@@ -65,6 +67,9 @@ const tils = (base: string) =>
 		schema: z.strictObject({
 			title: z.string(),
 			date: z.coerce.date(),
+			// For search results and link previews; without it, the start of
+			// the text is used.
+			description: z.string().min(1).optional(),
 			tags: z.array(z.string()).default([]),
 			fediverse: z.url().optional(),
 		}),

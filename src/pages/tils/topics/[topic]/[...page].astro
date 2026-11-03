@@ -26,7 +26,10 @@ export const getStaticPaths = (async ({ paginate }) => {
 const { page, name } = Astro.props;
 ---
 
-<Base title={`TILs about ${name}`} crumbs={[{ label: "TILs", href: "/tils/" }, { label: name }]}>
+<Base
+	title={`TILs about ${name}`}
+	description={`Today I Learned about ${name}: small things I picked up, newest first.`}
+	crumbs={[{ label: "TILs", href: "/tils/" }, { label: name }]}>
 	<h1>TILs about {name}</h1>
 	<p class="filters">
 		{page.total} {page.total === 1 ? "TIL" : "TILs"} · <a href="/tils/">all topics</a> ·{" "}

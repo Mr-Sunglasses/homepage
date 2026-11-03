@@ -35,9 +35,9 @@ const { trip, newer, older } = Astro.props;
 const { Content } = await render(trip);
 const { title, summary, photos, places, tags, fediverse } = trip.data;
 const cover = coverOf(trip);
-const og = cover
-	? photoFile(trip, cover, widthUpTo(cover, 1280), "webp")
-	: undefined;
+const ogWidth = cover && widthUpTo(cover, 1280);
+const og =
+	cover && ogWidth ? photoFile(trip, cover, ogWidth, "webp") : undefined;
 // Photos in the order they were taken; untimed ones keep their file order.
 const ordered = [...photos].sort(
 	(a, b) => (a.takenAt?.valueOf() ?? 0) - (b.takenAt?.valueOf() ?? 0),
@@ -48,7 +48,12 @@ const ordered = [...photos].sort(
 	title={title}
 	description={summary || `Photos from ${title}.`}
 	image={og}
+	imageAlt={cover?.alt}
+	imageWidth={ogWidth}
+	imageHeight={cover && ogWidth && Math.round((ogWidth * cover.height) / cover.width)}
 	type="article"
+	published={trip.data.start}
+	tags={tags}
 	isDraft={trip.isDraft}
 	searchable
 	crumbs={[{ label: "Travel", href: "/travel/" }, { label: title }]}

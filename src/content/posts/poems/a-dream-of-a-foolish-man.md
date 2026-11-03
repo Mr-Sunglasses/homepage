@@ -3,6 +3,7 @@ title: A Dream of a Foolish Man
 date: 2026-07-07
 description: 'A short story on the dream of a foolish man'
 image: './assets/images/dream-foolish.jpg'
+imageAlt: "Black-and-white photo of a calm river, reeds and a line of trees under a cloudy sky"
 tags: ['poems', 'short story', 'love']
 kind: poem
 ---

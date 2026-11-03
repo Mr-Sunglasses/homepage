@@ -5,6 +5,7 @@ import Backlinks from "@/components/Backlinks.astro";
 import EntryEnd from "@/components/EntryEnd.astro";
 import Base from "@/layouts/Base.astro";
 import { getTils, isoDate, tilTopicUrl, tilUrl } from "@/lib/content";
+import { excerpt } from "@/lib/og.mjs";
 
 export const getStaticPaths = (async () => {
 	const tils = await getTils();
@@ -25,9 +26,20 @@ export const getStaticPaths = (async () => {
 const { til, newer, older } = Astro.props;
 const { Content } = await render(til);
 const { title, date, tags, fediverse } = til.data;
+// For search results and link previews.
+const description = til.data.description ?? excerpt(til.body, 160);
 ---
 
-<Base title={title} type="article" isDraft={til.isDraft} searchable crumbs={[{ label: "TILs", href: "/tils/" }, { label: title }]}>
+<Base
+	title={title}
+	description={description || undefined}
+	type="article"
+	published={date}
+	tags={tags}
+	isDraft={til.isDraft}
+	searchable
+	crumbs={[{ label: "TILs", href: "/tils/" }, { label: title }]}
+>
 	<article class="h-entry">
 		<h1 class="p-name">{title}</h1>
 		<p class="entry-meta">

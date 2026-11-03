@@ -38,6 +38,9 @@ const full = largestWidth(photo);
 	title={`${label} · ${trip.data.title}`}
 	description={photo.alt || `A photo from ${trip.data.title}.`}
 	image={photoFile(trip, photo, widthUpTo(photo, 1280), "webp")}
+	imageAlt={photo.alt}
+	imageWidth={widthUpTo(photo, 1280)}
+	imageHeight={Math.round((widthUpTo(photo, 1280) * photo.height) / photo.width)}
 	isDraft={trip.isDraft}
 	crumbs={[
 		{ label: "Travel", href: "/travel/" },

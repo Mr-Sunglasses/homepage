@@ -32,7 +32,10 @@ for (const item of items) {
 }
 ---
 
-<Base title={`Archive, ${year}`} crumbs={[{ label: "Archive", href: "/archive/" }, { label: year }]}>
+<Base
+	title={`Archive, ${year}`}
+	description={`Everything I published in ${year}, month by month.`}
+	crumbs={[{ label: "Archive", href: "/archive/" }, { label: year }]}>
 	<h1>{year}</h1>
 	{
 		[...months.entries()].map(([key, { date, rows, notes }]) => (

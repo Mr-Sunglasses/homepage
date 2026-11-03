@@ -30,6 +30,8 @@ const month = isoMonth(note.data.date);
 	title={label}
 	description={noteLabel(note, 160)}
 	type="article"
+	published={note.data.date}
+	tags={note.data.tags}
 	isDraft={note.isDraft}
 	searchable
 	crumbs={[

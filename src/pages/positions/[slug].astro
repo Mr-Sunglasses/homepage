@@ -43,6 +43,9 @@ const {
 	title={title}
 	description={summary}
 	type="article"
+	// Positions keep no creation date: only when the view last changed.
+	modified={updated}
+	tags={tags}
 	isDraft={position.isDraft}
 	searchable
 	crumbs={[{ label: "Positions", href: "/positions/" }, { label: title }]}

@@ -120,7 +120,7 @@ CI also runs lint, unit tests, the type check, a build, and
 `scripts/check-built.mjs`: no JavaScript outside search, nothing loaded from
 another site (images, styles, scripts; travel photos come from the photo
 host), every internal link and anchor resolves, alt text on every image,
-and a homepage under 30 KB.
+a share image with alt text on every page, and a homepage under 30 KB.
 
 ## Open, light and accessible
 
@@ -140,8 +140,17 @@ and a homepage under 30 KB.
   required, contrast at least 4.5:1 in both themes, Hindi (Devanagari) text
   is marked `lang="hi"` so screen readers pronounce it, decorative symbols
   are hidden from them.
-- The default share image is `public/og.jpg`; after changing the photo or
-  the intro, redraw it with `node scripts/make-og.mjs`.
+- **Link previews.** Every page has a 1200×630 share image with alt text,
+  `og:`/`twitter:`/`article:` tags, and JSON-LD for search engines (a
+  Person on the homepage, an article on each dated page). Pages without a
+  suitable image get a card with their title, drawn at build time
+  (`src/plugins/og-cards.mjs`, set in Inter from `src/plugins/fonts/`, so
+  cards look the same on every machine). A post's cover is cropped to
+  1200×630 if it's close to that shape; otherwise it's shown whole beside
+  the title on the card. Give a cover `imageAlt:` in its post. TILs take
+  their description from `description:` or the start of the text.
+- The homepage's share image is `public/og.jpg`; after changing the photo
+  or the intro, redraw it with `node scripts/make-og.mjs`.
 
 ## Layout
 
@@ -153,7 +162,7 @@ src/content/tils/    Today I Learned (URLs: /tils/<slug>/, same slugs as tils.ka
 src/content/pages/   about, contact, now, uses
 src/content/trips/   one folder per trip: index.md with the story and photo list
 src/plugins/         Markdown plugins (callouts, iframes → links, title headings,
-                     wiki links, image hints, Hindi language marks)
+                     wiki links, image hints, Hindi language marks) and share cards
 scripts/             new, promote, photos-import/verify, checks, local stores
 public/admin/        the admin panel
 public/_redirects    old blog URLs → new ones (Netlify)

@@ -21,7 +21,10 @@ const { notes } = Astro.props;
 const label = monthName(notes[0].data.date);
 ---
 
-<Base title={`Notes, ${label}`} crumbs={[{ label: "Notes", href: "/notes/" }, { label }]}>
+<Base
+	title={`Notes, ${label}`}
+	description={`Short, dated notes from ${label}.`}
+	crumbs={[{ label: "Notes", href: "/notes/" }, { label }]}>
 	<h1>Notes, {label}</h1>
 	{notes.map((note) => <NoteBody note={note} />)}
 </Base>

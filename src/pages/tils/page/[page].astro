@@ -14,6 +14,9 @@ export const getStaticPaths = (async () =>
 const props = Astro.props;
 ---
 
-<Base title={`TILs, page ${props.page.currentPage}`} crumbs={[{ label: "TILs", href: "/tils/" }, { label: `Page ${props.page.currentPage}` }]}>
+<Base
+	title={`TILs, page ${props.page.currentPage}`}
+	description="Today I Learned: small things I picked up, by topic."
+	crumbs={[{ label: "TILs", href: "/tils/" }, { label: `Page ${props.page.currentPage}` }]}>
 	<TilIndex {...props} />
 </Base>

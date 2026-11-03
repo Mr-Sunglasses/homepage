@@ -3,6 +3,7 @@ import type { GetStaticPaths } from "astro";
 import KindFilter from "@/components/KindFilter.astro";
 import Pager from "@/components/Pager.astro";
 import YearList from "@/components/YearList.astro";
+import { site } from "@/config";
 import Base from "@/layouts/Base.astro";
 import {
 	getPosts,
@@ -43,7 +44,10 @@ const title =
 	page.currentPage > 1 ? `${label}, page ${page.currentPage}` : label;
 ---
 
-<Base title={title} crumbs={[{ label: "Writing", href: "/writing/" }, { label }]}>
+<Base
+	title={title}
+	description={`${label} by ${site.name}, newest first.`}
+	crumbs={[{ label: "Writing", href: "/writing/" }, { label }]}>
 	<h1>{label}</h1>
 	<KindFilter active={kind as Kind} counts={counts} />
 	<YearList items={(page.data as Post[]).map(postItem)} />

@@ -163,6 +163,7 @@ export function feed(
 			(a, b) => (b.pubDate?.valueOf() ?? 0) - (a.pubDate?.valueOf() ?? 0),
 		),
 		trailingSlash: true,
-		customData: "<language>en</language>",
+		// The icon feed readers show next to the feed (RSS allows up to 144px).
+		customData: `<language>en</language><image><url>${new URL("/favicon/favicon-light-128.png", site ?? "https://kanishkk.xyz").href}</url><title>${escapeHtml(title)}</title><link>${new URL("/", site ?? "https://kanishkk.xyz").href}</link><width>128</width><height>128</height></image>`,
 	});
 }

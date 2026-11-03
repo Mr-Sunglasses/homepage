@@ -9,6 +9,8 @@ export const site = {
 	intro:
 		"Pythonista, open-source contributor and Linux enthusiast from India. I write about software freedom, self-hosting and whatever I'm curious about, and I travel around India and the world.",
 	lang: "en",
+	// For og:locale: English, written in India.
+	locale: "en_IN",
 	license: {
 		name: "CC BY-NC-SA 4.0",
 		url: "https://creativecommons.org/licenses/by-nc-sa/4.0/",

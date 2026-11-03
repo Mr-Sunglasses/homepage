@@ -57,6 +57,13 @@
 		tags,
 		confidence,
 		{ name: "image", label: "Cover image", widget: "image", ...optional },
+		{
+			name: "imageAlt",
+			label: "What the cover shows",
+			widget: "string",
+			...optional,
+			hint: "Alt text, used when the cover is the image shown in link previews.",
+		},
 		fediverse,
 		markdownBody(["raw", "rich_text"]),
 	];
@@ -143,6 +150,13 @@
 		fields: [
 			{ name: "title", label: "Title", widget: "string" },
 			date,
+			{
+				name: "description",
+				label: "Description",
+				widget: "text",
+				...optional,
+				hint: "For link previews and search. Leave empty to use the start of the text.",
+			},
 			{ ...tags, label: "Topics", hint: "Comma-separated, e.g. git, bash" },
 			fediverse,
 			markdownBody(["raw", "rich_text"]),

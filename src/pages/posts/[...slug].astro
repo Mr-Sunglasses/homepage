@@ -37,11 +37,40 @@ export const getStaticPaths = (async () => {
 
 const { post, newer, older } = Astro.props;
 const { Content } = await render(post);
-const { title, date, updated, description, kind, tags, image, fediverse } =
-	post.data;
-const og = image
-	? await getImage({ src: image, width: 1200, format: "jpg" })
+const {
+	title,
+	date,
+	updated,
+	description,
+	kind,
+	tags,
+	image,
+	imageAlt,
+	fediverse,
+} = post.data;
+// A cover close to a link preview's shape (1.91:1) and big enough is
+// cropped to exactly 1200×630. Any other (square, portrait, small) would be
+// cut badly, so it's shown whole beside the title on a card instead.
+const ratio = image ? image.width / image.height : 0;
+const fitsPreview =
+	image && image.width >= 1100 && ratio >= 1.7 && ratio <= 2.1;
+const og = fitsPreview
+	? await getImage({
+			src: image,
+			width: 1200,
+			height: 630,
+			fit: "cover",
+			format: "jpg",
+		})
 	: undefined;
+const onCard =
+	image && !fitsPreview
+		? await getImage({
+				src: image,
+				width: Math.min(image.width, 800),
+				format: "jpg",
+			})
+		: undefined;
 const kindLabel = kinds[kind].label;
 ---
 
@@ -49,6 +78,13 @@ const kindLabel = kinds[kind].label;
 	title={title}
 	description={description || undefined}
 	image={og?.src}
+	imageAlt={imageAlt ?? `Cover image of “${title}”`}
+	imageWidth={og && 1200}
+	imageHeight={og && 630}
+	cardImage={onCard?.src}
+	published={date}
+	modified={updated}
+	tags={tags}
 	type="article"
 	isDraft={post.isDraft}
 	searchable

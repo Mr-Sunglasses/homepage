@@ -1,6 +1,8 @@
 import sitemap from "@astrojs/sitemap";
 import { defineConfig } from "astro/config";
 import remarkDirective from "remark-directive";
+import { site } from "./src/config.ts";
+import { ogCards } from "./src/plugins/og-cards.mjs";
 import { rehypeEmbedsToLinks } from "./src/plugins/rehype-embeds-to-links.mjs";
 import { rehypeImageHints } from "./src/plugins/rehype-image-hints.mjs";
 import { rehypeLangHindi } from "./src/plugins/rehype-lang-hindi.mjs";
@@ -8,6 +10,9 @@ import { remarkDropTitleHeading } from "./src/plugins/remark-drop-title-heading.
 import { remarkPlainDirectives } from "./src/plugins/remark-plain-directives.mjs";
 import { remarkWikiLinks } from "./src/plugins/remark-wiki-links.mjs";
 import { wikiLinkCheck } from "./src/plugins/wiki-link-check.mjs";
+
+// Page URL → date it last changed, collected by ogCards for the sitemap.
+const lastmods = new Map();
 
 // https://astro.build/config
 export default defineConfig({
@@ -32,8 +37,15 @@ export default defineConfig({
 	},
 	integrations: [
 		wikiLinkCheck(),
+		// Share cards for pages without their own image. Before sitemap: its
+		// build step reads the dates this one collects.
+		ogCards({ site: site.url, name: site.name, lastmods }),
 		sitemap({
 			filter: (page) => !page.includes("/drafts/"),
+			serialize: (item) => {
+				const lastmod = lastmods.get(item.url);
+				return lastmod ? { ...item, lastmod } : item;
+			},
 		}),
 	],
 	markdown: {

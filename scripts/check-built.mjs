@@ -7,6 +7,8 @@
 //   - every image has alt text (a trip can't be published with undescribed photos)
 //   - every link to this site points at a page (and anchor) that exists
 //   - the homepage stays small
+//   - every page has a share image that exists, with alt text, and any
+//     structured data (JSON-LD) parses
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -45,7 +47,11 @@ export function checkPage(
 	{ scripted = false, photoHost = PHOTO_HOST } = {},
 ) {
 	const problems = [];
-	if (!scripted && /<script\b/i.test(html))
+	// JSON-LD is data for search engines, not JavaScript: browsers don't run it.
+	const scripts = [...html.matchAll(/<script\b([^>]*)>/gi)].filter(
+		([, attrs]) => !/\btype="application\/ld\+json"/i.test(attrs),
+	);
+	if (!scripted && scripts.length > 0)
 		problems.push(`${path}: loads JavaScript`);
 	for (const url of new Set(loadedUrls(html))) {
 		if (!/^(https?:)?\/\//i.test(url)) continue;
@@ -58,6 +64,42 @@ export function checkPage(
 		if (!alt || (alt[2] ?? alt[3]).trim() === "") {
 			const src = tag.match(/\bsrc\s*=\s*"([^"]*)"/i)?.[1] ?? "?";
 			problems.push(`${path}: image without alt text (${src})`);
+		}
+	}
+	return problems;
+}
+
+/**
+ * Share-image and structured-data problems on a page. `files` is the built
+ * site (path → html or null), to check that the image exists.
+ */
+export function shareProblems(
+	path,
+	html,
+	files,
+	site = "https://kanishkk.xyz",
+) {
+	const problems = [];
+	const meta = (key) =>
+		html.match(
+			new RegExp(`<meta (?:property|name)="${key}" content="([^"]*)"`),
+		)?.[1];
+	const image = meta("og:image");
+	if (!image) problems.push(`${path}: no og:image`);
+	else if (image.startsWith(`${site}/`)) {
+		const file = decodeURIComponent(new URL(image).pathname.slice(1));
+		if (!files.has(file))
+			problems.push(`${path}: og:image ${image} doesn't exist`);
+	}
+	if (!meta("og:image:alt")?.trim())
+		problems.push(`${path}: og:image has no alt text`);
+	for (const [, json] of html.matchAll(
+		/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g,
+	)) {
+		try {
+			JSON.parse(json);
+		} catch {
+			problems.push(`${path}: structured data isn't valid JSON`);
 		}
 	}
 	return problems;
@@ -120,6 +162,8 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
 	const problems = [];
 	for (const [path, html] of pages) {
 		problems.push(...checkPage(path, html, { scripted: SCRIPTED.has(path) }));
+		if (!path.startsWith("drafts/"))
+			problems.push(...shareProblems(path, html, files));
 		for (const href of new Set(internalLinks(html))) {
 			const missing = linkTarget(href, files);
 			if (missing) problems.push(`${path}: broken link ${href} (${missing})`);
@@ -135,6 +179,6 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
 		process.exit(1);
 	}
 	console.log(
-		`Built site OK: ${pages.length} pages, no JavaScript outside search, nothing loaded from other sites, every image has alt text, every internal link resolves, homepage ${home} bytes.`,
+		`Built site OK: ${pages.length} pages, no JavaScript outside search, nothing loaded from other sites, every image has alt text, every internal link resolves, every page has a share image, homepage ${home} bytes.`,
 	);
 }

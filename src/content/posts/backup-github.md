@@ -3,6 +3,7 @@ title: Your GitHub Repos Aren't Safe
 date: 2026-05-28
 description: 'Your code is one outage or ban away from being gone forever. Here''s how to back up your GitHub repos on your selfhosted machine before it''s too late.'
 image: './assets/images/gitbackup-cover.png'
+imageAlt: "Illustration: a blue whale labelled gitea-gh-mirror, loaded with containers and lifted by balloons, among them the Gitea and GitHub logos"
 tags: ['github', 'selfhosting', 'homelab', 'backups']
 kind: article
 ---

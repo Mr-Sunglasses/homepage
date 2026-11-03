@@ -4,6 +4,7 @@ date: 2025-01-26
 description: "Expressed love for my favorite band Coldplay."
 tags: [nature, love, equality for all, world_peace, harmony, sustainability, global unity]
 image: "./assets/images/blog_music_coldplay_1.jpg"
+imageAlt: "The puppet band from Coldplay's Biutyful video under stage lights, with Coldplay Biutyful written in coloured letters"
 kind: article
 ---
 
