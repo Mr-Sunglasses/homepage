@@ -2,6 +2,7 @@ import sitemap from "@astrojs/sitemap";
 import { defineConfig } from "astro/config";
 import remarkDirective from "remark-directive";
 import { site } from "./src/config.ts";
+import { adminCacheBust } from "./src/plugins/admin-cache-bust.mjs";
 import { ogCards } from "./src/plugins/og-cards.mjs";
 import { rehypeEmbedsToLinks } from "./src/plugins/rehype-embeds-to-links.mjs";
 import { rehypeImageHints } from "./src/plugins/rehype-image-hints.mjs";
@@ -37,6 +38,7 @@ export default defineConfig({
 	},
 	integrations: [
 		wikiLinkCheck(),
+		adminCacheBust(),
 		// Share cards for pages without their own image. Before sitemap: its
 		// build step reads the dates this one collects.
 		ogCards({ site: site.url, name: site.name, lastmods }),
