@@ -17,6 +17,27 @@ https://tils.kanishkk.xyz/*                    https://kanishkk.xyz/tils/       
 /poems/*         /writing/poems/     301
 /posts/contact-me/  /contact/        301
 
+# Short links from the old homepage (Mr-Sunglasses/kanishkk.xyz). The
+# install scripts are run as `curl -sL kanishkk.xyz/<name> | bash`, so they
+# must keep working. 302, not 301: browsers cache a 301 for good, and these
+# are pointers that may change.
+/blog               /writing/        301
+/resume             /resume.pdf      301
+/assets/Kanishk_Resume.pdf  /resume.pdf  301
+/image              /kanishk.jpg     301
+/assets/image/kanishk.jpg   /kanishk.jpg  301
+/github             https://github.com/Mr-Sunglasses  302
+/floss              https://www.gnu.org/philosophy/free-sw.html  302
+/meet               https://calendly.com/itskanishkp/kanishk-open-source-work-related  302
+/telegram           https://t.me/thisiskanishkP  302
+/lid-close          https://gist.githubusercontent.com/Mr-Sunglasses/8f142644dbe6fd66b38ae71d4a271526/raw/1e5d8b1c21108c5e8304a3f862d8cb24eae21088/lid_ignore.py  302
+/audio2mp3          https://raw.githubusercontent.com/homelabshq/audio2mp3/refs/heads/main/install.sh  302
+/video2mp4          https://raw.githubusercontent.com/homelabshq/video2mp4/refs/heads/main/install.sh  302
+/appimage2desktop   https://raw.githubusercontent.com/homelabshq/appimage2desktop/refs/heads/main/install.sh  302
+/tunnelhouse        https://raw.githubusercontent.com/homelabshq/tunnelhouse/refs/heads/main/install.sh  302
+/nvim               https://raw.githubusercontent.com/Mr-Sunglasses/vimconfig/master/install.sh  302
+/oms                https://raw.githubusercontent.com/Mr-Sunglasses/omarchy-switch/main/install.sh  302
+
 # WebFinger: any @name@kanishkk.xyz finds the Fosstodon account
 # (src/pages/.well-known/webfinger.json.ts). Served, not redirected.
 /.well-known/webfinger  /.well-known/webfinger.json  200
@@ -25,3 +46,5 @@ https://tils.kanishkk.xyz/*                    https://kanishkk.xyz/tils/       
 # Forced (!): / always exists, and Netlify skips unforced rules for paths
 # that exist.
 / action=view url=:slug  /posts/:slug/  301!
+# Pages from that blog (?action=page&url=talks), linked from the old homepage.
+/ action=page url=:slug  /:slug/  301!
