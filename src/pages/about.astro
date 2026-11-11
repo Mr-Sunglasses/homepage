@@ -1,5 +1,6 @@
 ---
 import { render } from "astro:content";
+import HubDetail from "@/components/HubDetail.astro";
 import Base from "@/layouts/Base.astro";
 import { getPages } from "@/lib/content";
 import { hubSections } from "@/lib/hub";
@@ -29,7 +30,7 @@ const sections = await hubSections();
 				sections.map((s) => (
 					<li class="row">
 						<a href={s.href}>{s.label}</a>
-						<span class="detail">{s.detail}</span>
+						<HubDetail section={s} />
 					</li>
 				))
 			}

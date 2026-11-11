@@ -2,6 +2,7 @@
 import { Picture } from "astro:assets";
 import { render } from "astro:content";
 import avatar from "@/assets/avatar.jpg";
+import HubDetail from "@/components/HubDetail.astro";
 import Section from "@/components/Section.astro";
 import { site } from "@/config";
 import Base from "@/layouts/Base.astro";
@@ -95,7 +96,7 @@ const hub = await hubSections(
 				hub.map((s) => (
 					<li>
 						<a href={s.href}>{s.label}</a>
-						<span class="detail">{s.detail}</span>
+						<HubDetail section={s} />
 					</li>
 				))
 			}

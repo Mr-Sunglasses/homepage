@@ -643,6 +643,10 @@ td {
 	color: var(--muted);
 	font-size: 0.85rem;
 }
+.hub-grid .detail a {
+	font-family: inherit;
+	font-weight: normal;
+}
 .topics-line a {
 	font-weight: 600;
 }

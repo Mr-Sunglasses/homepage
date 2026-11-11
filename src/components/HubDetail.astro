@@ -1,0 +1,19 @@
+---
+import type { HubSection } from "@/lib/hub";
+
+// A hub entry's detail: "reading Animal Farm, Gunahon Ka Devta and Kafan".
+type Props = { section: HubSection };
+const { detail, links = [] } = Astro.props.section;
+---
+
+<span class="detail">
+	{detail}
+	{
+		links.map((link, i) => (
+			<>
+				{i === 0 ? " " : i === links.length - 1 ? " and " : ", "}
+				<a href={link.href}>{link.title}</a>
+			</>
+		))
+	}
+</span>

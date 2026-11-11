@@ -1,4 +1,5 @@
 import {
+	bookUrl,
 	getAvoid,
 	getBooks,
 	getGlossary,
@@ -10,7 +11,14 @@ import {
 	getTopics,
 } from "@/lib/content";
 
-export type HubSection = { href: string; label: string; detail: string };
+export type HubLink = { href: string; title: string };
+// `links` are named after the detail, e.g. the books I'm reading now.
+export type HubSection = {
+	href: string;
+	label: string;
+	detail: string;
+	links?: HubLink[];
+};
 
 const count = (n: number, one: string, many: string) =>
 	`${n} ${n === 1 ? one : many}`;
@@ -43,6 +51,7 @@ export async function hubSections(
 		getTopics(),
 		getPositions(),
 	]);
+	const reading = books.filter((b) => b.data.status === "reading");
 	const hasPage = (id: string) =>
 		pages.some((page) => page.id === id && page.body?.trim());
 	return [
@@ -74,7 +83,14 @@ export async function hubSections(
 		books.length > 0 && {
 			href: "/books/",
 			label: "Books",
-			detail: count(books.length, "book", "books"),
+			// What I'm reading now, by name; the count only when there's more.
+			detail:
+				reading.length === 0
+					? count(books.length, "book", "books")
+					: reading.length === books.length
+						? "reading"
+						: `${count(books.length, "book", "books")}, reading`,
+			links: reading.map((b) => ({ href: bookUrl(b), title: b.data.title })),
 		},
 		quotes.length > 0 && {
 			href: "/quotes/",
