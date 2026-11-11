@@ -7,7 +7,7 @@ export const site = {
 	description:
 		"Pythonista, open-source contributor and Linux enthusiast. Writing about software freedom and self-hosting, notes, links worth reading, and travel photos.",
 	intro:
-		"Pythonista, open-source contributor and Linux enthusiast from India. I write about software freedom, self-hosting and whatever I'm curious about, and I travel around India and the world.",
+		"Pythonista, open-source contributor and Linux enthusiast. I write about software freedom, self-hosting and whatever I'm curious about, and I travel.",
 	lang: "en",
 	// For og:locale: English, written in India.
 	locale: "en_IN",
