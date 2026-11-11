@@ -145,6 +145,9 @@ test("measured widths are never narrower than the text as drawn", () => {
 		);
 		// Without kerning, a line measures a little wider (up to ~8% for
 		// pairs like AV and WA), so it may wrap a bit early, never late.
-		assert.ok(measure(text, 60) < drawn * 1.1, `${text}: measured far too wide`);
+		assert.ok(
+			measure(text, 60) < drawn * 1.1,
+			`${text}: measured far too wide`,
+		);
 	}
 });
