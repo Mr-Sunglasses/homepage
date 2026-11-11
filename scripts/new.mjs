@@ -94,7 +94,7 @@ function draft() {
 			if (!title) throw new Error('usage: pnpm new position "Title"');
 			return [
 				`drafts/positions/${slugify(title)}.md`,
-				`---\ntitle: ${yaml(title)}\nsummary: "My view, in a sentence or two."\nconfidence: developing\nupdated: ${date}\nreviewed: ${date}\nchangeMind: ""\ntags: []\nhistory: []\n---\n\nWhy I think this, with sources.\n`,
+				`---\ntitle: ${yaml(title)}\nsummary: "My view, in a sentence or two."\nconfidence: developing\nupdated: ${date}\nreviewed: ${date}\nchangeMind: ""\ntags: []\nhistory: []\n# Further reading: articles here (/posts/<slug>/) or anything on the web.\n# links:\n#   - { title: "Liberate Telegram", url: /posts/liberate-tg/, note: "Why I self-host a proxy" }\nlinks: []\n---\n\nWhy I think this, with sources.\n`,
 			];
 		}
 		case "topic": {

@@ -682,6 +682,14 @@ td {
 	font-size: 1.1rem;
 }
 
+/* A position's further reading */
+.further {
+	padding-left: 1.1rem;
+}
+.further li {
+	margin: 0.3rem 0;
+}
+
 /* Links between pages */
 a.wiki {
 	text-decoration: underline dotted;

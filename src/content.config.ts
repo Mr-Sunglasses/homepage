@@ -93,6 +93,17 @@ const positions = (base: string) =>
 					z.strictObject({ date: z.coerce.date(), change: z.string().min(1) }),
 				)
 				.default([]),
+			// Further reading: articles here (a path like /posts/<slug>/) or
+			// anything on the web.
+			links: z
+				.array(
+					z.strictObject({
+						title: z.string().min(1),
+						url: z.union([z.url(), z.string().regex(/^\/\S*$/)]),
+						note: z.string().optional(),
+					}),
+				)
+				.default([]),
 			fediverse: z.url().optional(),
 		}),
 	});
