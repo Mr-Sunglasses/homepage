@@ -293,7 +293,11 @@
 	const quotes = (folder) =>
 		plain(folder, {
 			slug: "{{author}}-{{year}}{{month}}{{day}}",
-			sortable_fields: newestFirst,
+			// Quotes have no title: sort by date or by who said it.
+			sortable_fields: {
+				fields: ["date", "author"],
+				default: { field: "date", direction: "descending" },
+			},
 			summary: "{{author}} · {{date | date('YYYY-MM-DD')}}",
 			fields: [
 				{ ...markdownBody(), label: "The quote" },
