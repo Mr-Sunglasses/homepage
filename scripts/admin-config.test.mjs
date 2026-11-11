@@ -40,3 +40,7 @@ test("drafts are only offered locally", () => {
 	const local = configFor("localhost").collections.map((c) => c.name);
 	assert.ok(local.some((name) => name.startsWith("draft-")));
 });
+
+test("GitHub sign-in asks for public repos only", () => {
+	assert.equal(configFor("kanishkk.xyz").backend.auth_scope, "public_repo");
+});

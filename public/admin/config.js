@@ -489,6 +489,11 @@
 			name: "github",
 			repo: "Mr-Sunglasses/homepage",
 			branch: "main",
+			// "Sign In with GitHub" goes through Netlify's OAuth provider (the
+			// default base_url, api.netlify.com). The repo is public, so ask
+			// GitHub only for public repos, not the default "repo" (which
+			// includes private ones).
+			auth_scope: "public_repo",
 		},
 		site_url: "https://kanishkk.xyz",
 		display_url: "https://kanishkk.xyz",
