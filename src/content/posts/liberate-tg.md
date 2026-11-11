@@ -1,10 +1,14 @@
 ---
-title: Liberate Telegram ⛓️‍💥, Selfhost your own MTProto proxy!
+title: Liberate Telegram ⛓️‍💥; Selfhost your own MTProto proxy!
 date: 2026-06-21
-description: 'Selfhost your own MTProto proxy, fuck the government, and embrace freedom 🦅.'
-image: './assets/images/freedom.jpg'
-tags: ['liberation', 'freedom', 'self-hosting', 'internet-freedom']
+description: Selfhost your own MTProto proxy, fuck the government, and embrace freedom 🦅.
 kind: article
+tags:
+  - liberation
+  - freedom
+  - self-hosting
+  - internet-freedom
+image: ./assets/images/freedom.jpg
 ---
 
 I don't speak a lot about politics and governments, but this time I'm tired of seeing how foolish the governments around the world have become. Instead of accepting their own mistakes and fixing what's wrong, they never miss a chance to take a shitty, foolish step to cover up their mistakes and blame it on someone else.
