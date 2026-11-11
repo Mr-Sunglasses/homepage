@@ -151,6 +151,8 @@ a share image with alt text on every page, and a homepage under 30 KB.
   their description from `description:` or the start of the text.
 - The homepage's share image is `public/og.jpg`; after changing the photo
   or the intro, redraw it with `node scripts/make-og.mjs`.
+- The site's icon is a cat, drawn by `node scripts/make-favicon.mjs` in the
+  link colour of each theme (`public/favicon/`, `public/favicon.ico`).
 
 ## Layout
 

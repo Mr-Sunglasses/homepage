@@ -37,11 +37,11 @@ const bold = (() => {
 })();
 
 // The site's light theme (src/styles/global.css).
-const BG = "#fdfdfc";
-const FG = "#1d2024";
-const MUTED = "#5d636b";
-const ACCENT = "#1f5fbf";
-const SOFT = "#f3f4f6";
+const BG = "#fff";
+const FG = "#222";
+const MUTED = "#444";
+const ACCENT = "#3273dc";
+const SOFT = "#f2f2f2";
 
 const PAD = 80;
 const BAR = 14;
