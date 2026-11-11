@@ -34,6 +34,7 @@ const {
 	updated,
 	reviewed,
 	changeMind,
+	source,
 	history,
 	links,
 	tags,
@@ -62,6 +63,14 @@ const {
 			</time>
 			{reviewed && <>{" · "}reviewed <time datetime={isoDate(reviewed)}>{isoDate(reviewed)}</time></>}
 		</p>
+		{
+			source && (
+				<p class="source">
+					In response to <a href={source.url}>{source.title}</a>
+					{source.url.startsWith("http") && <span class="meta"> ({domainOf(source.url)})</span>}
+				</p>
+			)
+		}
 		<aside class="callout position-summary">
 			<p class="callout-title">My view</p>
 			<p>{summary}</p>

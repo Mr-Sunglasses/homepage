@@ -682,6 +682,11 @@ td {
 	font-size: 1.1rem;
 }
 
+/* The article or news a position responds to */
+.source {
+	font-size: 0.95em;
+}
+
 /* A position's further reading */
 .further {
 	padding-left: 1.1rem;

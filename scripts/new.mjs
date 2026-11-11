@@ -4,7 +4,7 @@
 //   pnpm new note ["Title"] [--link https://…]
 //   pnpm new link https://… "Title"
 //   pnpm new til "Title" [--tags git,bash]
-//   pnpm new position "Software freedom"
+//   pnpm new position "Software freedom" [--link https://…]
 //   pnpm new topic "Self-hosting" --tags selfhosting,homelab
 //   pnpm new project "bitssh" [--repo https://…]
 //   pnpm new talk "Title" --event "PyCon India" --start 2026-11-20
@@ -91,10 +91,15 @@ function draft() {
 		}
 		case "position": {
 			const [title] = args;
-			if (!title) throw new Error('usage: pnpm new position "Title"');
+			if (!title)
+				throw new Error('usage: pnpm new position "Title" [--link https://…]');
+			// --link: the article or news this is a position on.
+			const source = values.link
+				? `source:\n  title: "Title of the article"\n  url: ${values.link}\n`
+				: "";
 			return [
 				`drafts/positions/${slugify(title)}.md`,
-				`---\ntitle: ${yaml(title)}\nsummary: "My view, in a sentence or two."\nconfidence: developing\nupdated: ${date}\nreviewed: ${date}\nchangeMind: ""\ntags: []\nhistory: []\n# Further reading: articles here (/posts/<slug>/) or anything on the web.\n# links:\n#   - { title: "Liberate Telegram", url: /posts/liberate-tg/, note: "Why I self-host a proxy" }\nlinks: []\n---\n\nWhy I think this, with sources.\n`,
+				`---\ntitle: ${yaml(title)}\n${source}summary: "My view, in a sentence or two."\nconfidence: developing\nupdated: ${date}\nreviewed: ${date}\nchangeMind: ""\ntags: []\nhistory: []\n# Further reading: articles here (/posts/<slug>/) or anything on the web.\n# links:\n#   - { title: "Liberate Telegram", url: /posts/liberate-tg/, note: "Why I self-host a proxy" }\nlinks: []\n---\n\nWhy I think this, with sources.\n`,
 			];
 		}
 		case "topic": {

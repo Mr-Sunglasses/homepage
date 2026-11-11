@@ -86,6 +86,13 @@ const positions = (base: string) =>
 			updated: z.coerce.date(),
 			reviewed: z.coerce.date().optional(),
 			changeMind: z.string().optional(),
+			// The article or news this is my position on, if any.
+			source: z
+				.strictObject({
+					title: z.string().min(1),
+					url: z.union([z.url(), z.string().regex(/^\/\S*$/)]),
+				})
+				.optional(),
 			tags: z.array(z.string()).default([]),
 			// Dated changes of view, newest first.
 			history: z

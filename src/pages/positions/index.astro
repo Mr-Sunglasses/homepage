@@ -1,7 +1,7 @@
 ---
 import Confidence from "@/components/Confidence.astro";
 import Base from "@/layouts/Base.astro";
-import { getPositions, isoDate, positionUrl } from "@/lib/content";
+import { domainOf, getPositions, isoDate, positionUrl } from "@/lib/content";
 
 const positions = (await getPositions()).sort((a, b) =>
 	a.data.title.localeCompare(b.data.title),
@@ -28,6 +28,12 @@ const positions = (await getPositions()).sort((a, b) =>
 					</a>
 					<Confidence level={p.data.confidence} />
 					{p.isDraft && <span class="draft-mark">draft</span>}
+					{p.data.source && (
+						<p class="source">
+							On <a href={p.data.source.url}>{p.data.source.title}</a>
+							{p.data.source.url.startsWith("http") && <span class="meta"> ({domainOf(p.data.source.url)})</span>}
+						</p>
+					)}
 					<p>{p.data.summary}</p>
 					<p class="meta">updated {isoDate(p.data.updated)}</p>
 				</li>

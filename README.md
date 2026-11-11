@@ -27,7 +27,7 @@ pnpm new post "Title" [--kind article|poem|thought]
 pnpm new note ["Title"] [--link https://…]
 pnpm new link https://… "Title"
 pnpm new til "Title" [--tags git,bash]
-pnpm new position "Software freedom"
+pnpm new position "Software freedom" [--link https://…]   # --link: the news it responds to
 pnpm new topic "Self-hosting" --tags selfhosting,homelab
 pnpm new project "Name" [--repo https://…]
 pnpm new talk "Title" --event "PyCon India" [--start YYYY-MM-DD]

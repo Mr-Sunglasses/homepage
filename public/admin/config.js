@@ -178,6 +178,22 @@
 			summary: "{{title}} · {{confidence}} · {{updated | date('YYYY-MM-DD')}}",
 			fields: [
 				{ name: "title", label: "Title", widget: "string" },
+				{
+					name: "source",
+					label: "In response to",
+					hint: "The article or news this is your position on, if any.",
+					widget: "object",
+					...optional,
+					fields: [
+						{ name: "title", label: "Its title", widget: "string" },
+						{
+							name: "url",
+							label: "Link",
+							widget: "string",
+							pattern: ["^(https?://|/)", "A full URL, or a path on this site starting with /."],
+						},
+					],
+				},
 				{ name: "summary", label: "My view, in a sentence or two", widget: "text" },
 				{ ...confidence, required: true, default: "developing" },
 				{ name: "updated", label: "Last changed", widget: "datetime", type: "date" },
